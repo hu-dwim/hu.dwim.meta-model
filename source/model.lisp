@@ -11,7 +11,7 @@
 
 (define-model-class model (model-element-collection)
   ((database-type
-    'postgresql-postmodern/dwim
+    'postgresql/dwim
     :type symbol)
    (connection-specification
     nil
@@ -21,7 +21,7 @@
     nil
     :documentation "Used for caching the hu.dwim.rdbms database instance.")
    (transaction-mixin
-    nil ; postgresql-postmodern/dwim adds what it needs to add
+    nil ; postgresql/dwim adds what it needs to add
     :documentation "The mixin class name for transactions.")
    (model-element-cache
     (make-hash-table :test #'equal :synchronized #t)
@@ -104,11 +104,10 @@
        (with-transaction
          ,@body))))
 
-(def class* postgresql-postmodern/dwim (hu.dwim.perec:database-mixin
-                                        hu.dwim.rdbms:postgresql-postmodern)
+(def class* postgresql/dwim (hu.dwim.perec:database-mixin hu.dwim.rdbms.postgresql:postgresql)
   ())
 
-(def method hu.dwim.rdbms:transaction-mixin-class list ((self postgresql-postmodern/dwim))
+(def method hu.dwim.rdbms:transaction-mixin-class list ((self postgresql/dwim))
   'transaction-mixin/dwim)
 
 (def (class* e) transaction-mixin/dwim (hu.dwim.perec:transaction-mixin transaction-with-hooks-mixin)

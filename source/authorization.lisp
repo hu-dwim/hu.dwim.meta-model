@@ -192,7 +192,7 @@
 (def function authorization-name-for (operation-name &optional
                                                      (effective-subject-type-name nil effective-subject-type-name-p)
                                                      (instance-type-name nil instance-type-name-p))
-  (format-symbol (symbol-package optional-name)
+  (format-symbol (symbol-package operation-name)
                  "~{~A~}"
                  (append
                   (list operation-name)

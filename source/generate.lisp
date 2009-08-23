@@ -198,7 +198,7 @@
         (for len from (length instances) downto 1)
         (for i = (random* len))
         (for instance = (nth i instances))
-        (delete! instance instances)
+        (deletef instances instance)
         (collect instance)))
 
 (def function find-instanciable-subclass (entity)
