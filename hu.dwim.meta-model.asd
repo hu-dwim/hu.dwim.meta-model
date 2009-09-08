@@ -54,7 +54,7 @@
                              (:file "state-property" :depends-on ("entity" "finite-state-machine"))
                              (:file "statistics" :depends-on ("model"))
                              (:file "structure-diagram" :depends-on ("relationship"))
-                             (:file "subject" :depends-on ("entity"))
+                             (:file "subject" :depends-on ("entity" "property"))
                              (:file "type" :depends-on ("configuration"))
                              (:file "util" :depends-on ("configuration"))
                              (:file "worker-group" :depends-on ("configuration"))))))
