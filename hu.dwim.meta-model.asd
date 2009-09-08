@@ -4,9 +4,9 @@
 ;;;
 ;;; See LICENCE for details.
 
-(in-package :asdf)
-
 (load-system :hu.dwim.asdf)
+
+(in-package :hu.dwim.asdf)
 
 (defsystem :hu.dwim.meta-model
   :class hu.dwim.system
@@ -16,16 +16,19 @@
   :licence "BSD / Public domain"
   :description "Various meta model classes and behavior"
   :depends-on (:cl-l10n
+               :command-line-arguments
                :hu.dwim.common-lisp
                :hu.dwim.computed-class
                :hu.dwim.def
                :hu.dwim.def+cl-l10n
                :hu.dwim.defclass-star
                :hu.dwim.delico
-               :hu.dwim.perec
+               :hu.dwim.logger+bordeaux-threads
+               :hu.dwim.perec.postgresql
                :hu.dwim.syntax-sugar
                :hu.dwim.util
-               :hu.dwim.walker)
+               :hu.dwim.walker
+               :hu.dwim.wui)
   :components ((:module "source"
                 :components ((:file "association" :depends-on ("statistics" "relationship" "generalization" "property"))
                              (:file "authentication" :depends-on ("entity" "subject" "change-notification"))
@@ -39,7 +42,7 @@
                              (:file "generate" :depends-on ("state-property" "persistent-process"))
                              (:file "logger" :depends-on ("configuration"))
                              (:file "meta-model" :depends-on ("util"))
-                             (:file "model" :depends-on ("model-element"))
+                             (:file "model" :depends-on ("model-element" "logger"))
                              (:file "model-element" :depends-on ("meta-model"))
                              (:file "package")
                              (:file "persistent-process" :depends-on ("entity" "state-property" "authentication" "type" "finite-state-machine"))
