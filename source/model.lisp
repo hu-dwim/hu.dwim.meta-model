@@ -52,29 +52,6 @@
 (def special-variable *model* (make-model)
   "This is the singleton top level model object which contains all the defined model elements.")
 
-;; TODO: this should be turned into a real read-write lock
-;; TODO: since this is not a read-write lock this makes access to the model serialzied (not that it's used anywhere)
-(def special-variable *model-lock* (make-recursive-lock "Model lock"))
-
-(def (macro e) with-read-lock-held-on-model (&body body)
-  ;; TODO should be `(with-recursive-lock-held (*model-lock*)
-  ;;  ,@body)
-  `(progn
-     ,@body))
-
-(def (macro e) with-write-lock-held-on-model (&body body)
-  `(with-recursive-lock-held (*model-lock*)
-    ,@body))
-
-(def function assert-model-is-read-locked ()
-  "To avoid deadlocks, random functions at random places should not use with-read-lock-held-on-model, but instead assert for a valid lock held by the caller."
-  #+sbcl (assert (eq (sb-thread::mutex-value *model-lock*) (current-thread)) ()
-                 "You must have a lock on the model while messing around here")
-  #-sbcl (not-yet-implemented))
-
-(def function assert-model-is-write-locked ()
-  (assert-model-is-read-locked))
-
 (def (function e) export-model ()
   (bind ((all-the-rest-confirmed? #f))
     (handler-bind ((hu.dwim.rdbms:unconfirmed-alter-table-error

@@ -21,7 +21,6 @@
 (def (function e) register-global-instance-changed-listener (instance listener)
   (when *instance-changed-listeners-enabled*
     (notification.dribble "Registering global instance changed listener ~A for ~A" listener instance)
-    (assert-model-is-read-locked)
     (with-recursive-lock-held (*instance-changed-listeners-lock*)
       (push (make-weak-pointer listener) (hash-value-of instance *global-instance-changed-listeners*)))))
 
@@ -33,7 +32,6 @@
 (def function notify-global-instance-changed-listeners (transaction instance transaction-event)
   (when *instance-changed-listeners-enabled*
     (notification.dribble "Notifying instance changed listeners of ~A" instance)
-    ;; TODO: (assert-model-is-read-locked)
     (with-recursive-lock-held (*instance-changed-listeners-lock*)
       (bind (((:values weak-pointer-list foundp) (hash-value-of instance *global-instance-changed-listeners*)))
         (when foundp
