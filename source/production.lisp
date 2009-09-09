@@ -182,6 +182,7 @@
                             (hu.dwim.wui::drive-timer timer))))
                       #+nil
                       (hu.dwim.model:shutdown-cluster-node)
+                      (hu.dwim.wui:shutdown-server wui-server)
                       (iter (until (ready-to-quit? wui-server))
                             (log.debug "Still not ready to quit, waiting...")
                             (sleep 1)))
