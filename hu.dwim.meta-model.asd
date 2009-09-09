@@ -48,7 +48,7 @@
                              (:file "persistent-process" :depends-on ("entity" "state-property" "authentication" "type" "finite-state-machine"))
                              (:file "process-dsl" :depends-on ("persistent-process"))
                              (:file "process-scheduler" :depends-on ("worker-group" "persistent-process" "subject"))
-                             (:file "production" :depends-on ("logger"))
+                             (:file "production" :depends-on ("model"))
                              (:file "property" :depends-on ("model"))
                              (:file "relationship" :depends-on ("model"))
                              (:file "state-property" :depends-on ("entity" "finite-state-machine"))
