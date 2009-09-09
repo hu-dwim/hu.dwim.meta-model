@@ -6,6 +6,7 @@
 
 (in-package :hu.dwim.meta-model)
 
+;; TODO: factor out postgresql arguments into hu.dwim.rdbms
 (def special-variable *command-line-arguments*
     '(("help"
        :type boolean
@@ -13,9 +14,11 @@
        :documentation "Provides this help text")
       ("database-host"
        :type string
+       :initial-value "localhost"
        :documentation "The server host name where the database is listening")
       ("database-port"
        :type integer
+       :initial-value 5432
        :documentation "The server port where the database is listening")
       ("database-name"
        :type string
@@ -29,17 +32,18 @@
       ;; TODO: handle this
       ("http-port"
        :type integer
-       :optional #t
+       :initial-value 80
        :documentation "The HTTP server port where it will listening")
       ("cluster-name"
        :type string
+       :initial-value "production"
        :documentation "The cluster name as stored in the database. Configuration of this cluster node is read from the database by looking up the computer's network name.")
       ("pid-file"
        :type string
-       :documentation "The PID file is created when the server starts. The file will be deleted when the system stops.")
+       :documentation "The PID file is created when the server starts. The file will be deleted when the server stops.")
       ("swank-port"
        :type integer
-       :optional #t
+       :initial-value 4005
        :documentation "The port is used to connect to the running server with SLIME.")
       ("repl"
        :type boolean
