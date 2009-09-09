@@ -97,7 +97,7 @@
           (setf *random-state* (make-random-state t))
           (setf *package* project-package)
           (ensure-external-format-is-utf-8)
-          (bind (((&key help database-host database-port database-name database-user-name database-password cluster-name pid-file swank-port repl test-mode)
+          (bind (((&key help database-host database-port database-name database-user-name database-password http-port cluster-name pid-file swank-port repl test-mode)
                   (command-line-arguments:process-command-line-options *command-line-arguments* (command-line-arguments)))
                  (connection-specification `(:host ,database-host :port ,database-port :database ,database-name :user-name ,database-user-name :password ,database-password))
                  (cluster-name (or cluster-name
