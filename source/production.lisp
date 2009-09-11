@@ -6,53 +6,26 @@
 
 (in-package :hu.dwim.meta-model)
 
-;; TODO: factor out postgresql arguments into hu.dwim.rdbms
-(def special-variable *command-line-arguments*
-    '(("help"
-       :type boolean
-       :optional #t
-       :documentation "Provides this help text")
-      ("database-host"
-       :type string
-       :initial-value "localhost"
-       :documentation "The server host name where the database is listening")
-      ("database-port"
-       :type integer
-       :initial-value 5432
-       :documentation "The server port where the database is listening")
-      ("database-name"
-       :type string
-       :documentation "The database name that will be connected")
-      ("database-user-name"
-       :type string
-       :documentation "The user name that is used to connect to the database")
-      ("database-password"
-       :type string
-       :documentation "The password that is used to connect to the database")
-      ;; TODO: handle this
-      ("http-port"
-       :type integer
-       :initial-value 80
-       :documentation "The HTTP server port where it will listening")
-      ("cluster-name"
-       :type string
-       :initial-value "production"
-       :documentation "The cluster name as stored in the database. Configuration of this cluster node is read from the database by looking up the computer's network name.")
-      ("pid-file"
-       :type string
-       :documentation "The PID file is created when the server starts. The file will be deleted when the server stops.")
-      ("swank-port"
-       :type integer
-       :initial-value 4005
-       :documentation "The port is used to connect to the running server with SLIME.")
-      ("repl"
-       :type boolean
-       :optional #t
-       :documentation "If provided then instead of starting the server only a REPL will be started. This might be useful for mainenance, testing and bug fixing.")
-      ("test-mode"
-       :type boolean
-       :optional #t
-       :documentation "If provided then the server starts up in test mode. This allows to login with the same password for any subject.")))
+(def (special-variable e) *generic-command-line-argument-specifications*
+  '(("cluster-name"
+     :type string
+     :initial-value "production"
+     :documentation "The cluster name as stored in the database. Configuration of this cluster node is read from the database by looking up the computer's network name.")
+    ("pid-file"
+     :type string
+     :documentation "The PID file is created when the server starts. The file will be deleted when the server stops.")
+    ("swank-port"
+     :type integer
+     :initial-value 4005
+     :documentation "The port is used to connect to the running server with SLIME.")
+    ("repl"
+     :type boolean
+     :optional #t
+     :documentation "If provided then instead of starting the server only a REPL will be started. This might be useful for mainenance, testing and bug fixing.")
+    ("test-mode"
+     :type boolean
+     :optional #t
+     :documentation "If provided then the server starts up in test mode. This allows to login with the same password for any subject.")))
 
 (def (function e) ready-to-quit? (wui-server)
   (not (or (hu.dwim.wui:is-server-running? wui-server)
@@ -87,7 +60,8 @@
       #+nil
       (set-appenders 'hu.dwim.meta-model::audit dwim-appender (make-instance 'hu.dwim.model:persistent-log-appender)))))
 
-(def (function e) production-image-toplevel (project-system-name wui-server wui-application)
+;; TODO: factor this apart into utility functions for better reusability and more finer control in the end application
+(def function production-image-toplevel (command-line-arguments project-system-name wui-server wui-application)
   (restart-case 
       (progn
         (setup-logger project-system-name)
@@ -97,18 +71,16 @@
           (setf *random-state* (make-random-state t))
           (setf *package* project-package)
           (ensure-external-format-is-utf-8)
-          (bind (((&key help database-host database-port database-name database-user-name database-password http-port cluster-name pid-file swank-port repl test-mode)
-                  (command-line-arguments:process-command-line-options *command-line-arguments* (command-line-arguments)))
+          ;; TODO: factor out the database arguments into rdbms
+          (bind (((&key database-host database-port database-name database-user-name database-password cluster-name pid-file swank-port repl test-mode &allow-other-keys) command-line-arguments)
                  (connection-specification `(:host ,database-host :port ,database-port :database ,database-name :user-name ,database-user-name :password ,database-password))
                  (cluster-name (or cluster-name
                                    (if (hu.dwim.wui:running-in-test-mode? wui-application)
                                        "test"
                                        "production"))))
-            (when help
-              (command-line-arguments:show-option-help *command-line-arguments*)
-              (quit-production 0))
             (when repl
               (incf swank-port))
+            (start-swank-server swank-port)
             (log.info "Database connection is: ~S~%" connection-specification)
             (setf (connection-specification-of *model*) connection-specification)
             (awhen test-mode
