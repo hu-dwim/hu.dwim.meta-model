@@ -238,7 +238,7 @@
 
 (def function generate-name (prefix)
   (bind ((counter-fn (get-or-create-counter prefix)))
-    (concatenate-string prefix "-" (write-to-string (funcall counter-fn)))))
+    (string+ prefix "-" (write-to-string (funcall counter-fn)))))
 
 (def special-variable *counters* (make-hash-table :test 'equal))
 
