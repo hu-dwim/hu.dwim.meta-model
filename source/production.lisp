@@ -6,7 +6,7 @@
 
 (in-package :hu.dwim.meta-model)
 
-(def (special-variable e) *generic-command-line-argument-specifications*
+(def (special-variable e) *generic-command-line-options*
   '(("cluster-name"
      :type string
      :initial-value "production"
