@@ -70,7 +70,7 @@
                (project-package (find-package (system-package-name project-system))))
           (setf *random-state* (make-random-state t))
           (setf *package* project-package)
-          (ensure-external-format-is-utf-8)
+          (ensure-utf-8-external-format)
           ;; TODO: factor out the database arguments into rdbms
           (bind (((&key database-host database-port database-name database-user-name database-password cluster-name pid-file swank-port repl test-mode &allow-other-keys) command-line-arguments)
                  (connection-specification `(:host ,database-host :port ,database-port :database ,database-name :user-name ,database-user-name :password ,database-password))
