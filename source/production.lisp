@@ -61,7 +61,7 @@
       (set-appenders 'hu.dwim.meta-model::audit dwim-appender (make-instance 'hu.dwim.model:persistent-log-appender)))))
 
 ;; TODO: factor this apart into utility functions for better reusability and more finer control in the end application
-(def function production-image-toplevel (command-line-arguments project-system-name wui-server wui-application)
+(def (function e) startup-dwim-server (command-line-arguments project-system-name wui-server wui-application)
   (restart-case 
       (progn
         (setup-logger project-system-name)
@@ -160,8 +160,8 @@
                             (sleep 1)))
                     (log.info "Everything's down, exiting normally")
                     (format *debug-io* "Everything's down, exiting normally~%"))))))
-        (quit-production 0))
+        (quit 0))
     (give-up nil
       :report (lambda (stream)
                 (format stream "Give up starting the image and quit"))
-      (quit-production 2))))
+      (quit 2))))
