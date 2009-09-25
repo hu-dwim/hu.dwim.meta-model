@@ -9,9 +9,7 @@
 (defpackage :hu.dwim.meta-model
   (:use :bordeaux-threads
         :cl-containers
-        :cl-graph
         :cl-l10n
-        :cl-ppcre
         :hu.dwim.asdf
         :hu.dwim.common-lisp
         :hu.dwim.computed-class

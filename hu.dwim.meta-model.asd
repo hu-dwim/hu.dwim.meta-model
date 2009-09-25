@@ -15,11 +15,10 @@
            "Tamás Borbély <tomi.borbely@gmail.com>")
   :licence "BSD / Public domain"
   :description "Various meta model classes and behavior"
-  :depends-on (:cl-l10n
+  :depends-on (:cl-containers
                :command-line-arguments
                :hu.dwim.common-lisp
                :hu.dwim.computed-class
-               :hu.dwim.def
                :hu.dwim.def+cl-l10n
                :hu.dwim.defclass-star
                :hu.dwim.delico
@@ -28,7 +27,10 @@
                :hu.dwim.syntax-sugar
                :hu.dwim.util
                :hu.dwim.walker
-               :hu.dwim.wui)
+               :hu.dwim.wui
+               :local-time
+               :metacopy-with-contextl
+               :trivial-garbage)
   :components ((:module "source"
                 :components ((:file "association" :depends-on ("statistics" "relationship" "generalization" "property"))
                              (:file "authentication" :depends-on ("entity" "subject" "change-notification"))
