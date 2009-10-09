@@ -46,7 +46,7 @@
     (flet ((set-appenders (logger-name &rest appender-designators)
              ;; TODO: KLUDGE: remove this level setting
              (setf (log-level (find-logger logger-name)) +info+)
-             (setf (appenders-of (find-logger logger-name))
+             (setf (hu.dwim.logger::appenders-of (find-logger logger-name))
                    (list* error-appender
                           (mapcar (lambda (appender-designator)
                                     (etypecase appender-designator
