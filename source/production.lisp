@@ -40,8 +40,8 @@
   (unless (ignore-errors
             (truename *log-directory*))
     (error "Log directory does not exist: ~S" *log-directory*))
-  (bind ((error-appender (make-level-filter-appender +warn+ (hu.dwim.logger:make-thread-safe-file-log-appender "error.log")))
-         (dwim-appender (hu.dwim.logger:make-thread-safe-file-log-appender "dwim.log")))
+  (bind ((error-appender (make-level-filter-appender +warn+ (make-thread-safe-file-appender "error.log")))
+         (dwim-appender (make-thread-safe-file-appender "dwim.log")))
     ;; TODO: put in hu.dwim.logger?
     (flet ((set-appenders (logger-name &rest appender-designators)
              ;; TODO: KLUDGE: remove this level setting
@@ -50,15 +50,15 @@
                    (list* error-appender
                           (mapcar (lambda (appender-designator)
                                     (etypecase appender-designator
-                                      (string (hu.dwim.logger:make-thread-safe-file-log-appender appender-designator))
-                                      (log-appender appender-designator)))
+                                      (string (make-thread-safe-file-appender appender-designator))
+                                      (appender appender-designator)))
                                   appender-designators)))))
       (set-appenders 'hu.dwim.wui::wui "wui.log")
-      (set-appenders 'hu.dwim.rdbms::log "rdbms.log")
-      (set-appenders 'hu.dwim.rdbms::sql-log "sql.log")
-      (set-appenders 'hu.dwim.meta-model::log dwim-appender)
+      (set-appenders 'hu.dwim.rdbms::rdbms "rdbms.log")
+      (set-appenders 'hu.dwim.rdbms::sql "sql.log")
+      (set-appenders 'hu.dwim.meta-model::meta-model dwim-appender)
       #+nil
-      (set-appenders 'hu.dwim.meta-model::audit dwim-appender (make-instance 'hu.dwim.model:persistent-log-appender)))))
+      (set-appenders 'hu.dwim.meta-model::audit dwim-appender (make-instance 'hu.dwim.model:persistent-appender)))))
 
 ;; TODO: factor this apart into utility functions for better reusability and more finer control in the end application
 (def (function e) startup-dwim-server (command-line-arguments project-system-name wui-server wui-application)

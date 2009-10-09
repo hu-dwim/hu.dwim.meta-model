@@ -6,25 +6,22 @@
 
 (in-package :hu.dwim.meta-model)
 
-(def logger log ())
+(def logger meta-model ())
 
-(def logger loading (log))
+(def logger loading (meta-model))
 
-(def logger image (log))
+(def logger image (meta-model))
 
-(def logger notification (log))
+(def logger notification (meta-model))
 
-(def logger process (log))
+(def logger process (meta-model))
 
-(def logger scheduler (process) :level +info+)
+(def logger scheduler (process) :runtime-level +info+)
 
-(def logger authentication (log))
+(def logger authentication (meta-model))
 
-(def logger authorization (log))
+(def logger authorization (meta-model))
 
-(def (logger e) audit (log))
+(def (logger e) audit (meta-model))
 
 (def logger login (audit))
-
-(export '(audit.dribble audit.debug audit.warn audit.info audit.error))
-
