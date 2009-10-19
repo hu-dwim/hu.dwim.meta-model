@@ -65,7 +65,7 @@
   (restart-case 
       (progn
         (setup-logger project-system-name)
-        (log.info "~S toplevel init speaking" project-system-name)
+        (meta-model.info "~S toplevel init speaking" project-system-name)
         (bind ((project-system (asdf:find-system project-system-name))
                (project-package (find-package (system-package-name project-system))))
           (setf *random-state* (make-random-state t))
@@ -81,10 +81,10 @@
             (when repl
               (incf swank-port))
             (start-swank-server swank-port)
-            (log.info "Database connection is: ~S~%" connection-specification)
+            (meta-model.info "Database connection is: ~S~%" connection-specification)
             (setf (connection-specification-of *model*) connection-specification)
             (awhen test-mode
-              (log.info "Enabling test mode")
+              (meta-model.info "Enabling test mode")
               (setf (hu.dwim.wui:running-in-test-mode? wui-application) #t)
               (unless (search "-test" database-name)
                 (cerror "Continue"
@@ -94,10 +94,10 @@
                 (progn
                   (with-simple-restart (abort "Skip exporting model and start the REPL")
                     (with-model-transaction
-                      (log.info "Calling EXPORT-MODEL with database ~A, connection-specification ~A" (database-of *model*) (connection-specification-of *model*))
+                      (meta-model.info "Calling EXPORT-MODEL with database ~A, connection-specification ~A" (database-of *model*) (connection-specification-of *model*))
                       (export-model)))
                   (awhen (load-and-eval-config-file project-system-name)
-                    (log.info "Loaded config file ~A" it))
+                    (meta-model.info "Loaded config file ~A" it))
                   (sb-impl::toplevel-repl nil))
                 (with-pid-file pid-file
                   (disable-debugger)
@@ -107,20 +107,20 @@
                                   ;; so this is not a problem.
                                   (lambda (error)
                                     (best-effort-log-error "Exiting because something was tried to be altered in the RDBMS schema at unattended startup: ~A" error))))
-                    (log.info "Starting up cluster ~S" cluster-name)
+                    (meta-model.info "Starting up cluster ~S" cluster-name)
                     (with-new-compiled-query-cache
                       #+nil
                       (hu.dwim.model:startup-cluster-node cluster-name wui-server))
                     (hu.dwim.wui:startup-server wui-server)
                     (with-save-core-and-die-restart
                       (awhen (load-and-eval-config-file project-system-name)
-                        (log.info "Loaded config file ~A" it))
+                        (meta-model.info "Loaded config file ~A" it))
                       (block running
                         ;; TODO: put the timer stuff in hu.dwim.wui and remove dependency
                         (bind ((timer (hu.dwim.wui::timer-of wui-server)))
                           (flet ((running-signal-handler (signal code scp)
                                    (declare (ignore signal code scp))
-                                   (log.info "SIGTERM/SIGINT was received, initiating shutdown")
+                                   (meta-model.info "SIGTERM/SIGINT was received, initiating shutdown")
                                    (format *debug-io* "~%SIGTERM/SIGINT was received, initiating shutdown~%")
                                    (hu.dwim.wui:register-timer-entry timer (local-time:now)
                                                                      (named-lambda quit-now ()
@@ -149,7 +149,7 @@
                                                               :name "Quit checker")
                             (sb-sys:enable-interrupt sb-unix:sigterm #'running-signal-handler)
                             (sb-sys:enable-interrupt sb-unix:sigint #'running-signal-handler)
-                            (log.info "Final signal handlers are installed, everything's started normally. Calling into DRIVE-TIMER now...")
+                            (meta-model.info "Final signal handlers are installed, everything's started normally. Calling into DRIVE-TIMER now...")
                             (format *debug-io* "~A: Everything's started normally~%" (local-time:now))
                             (hu.dwim.wui::drive-timer timer))))
                       #+nil
@@ -158,7 +158,7 @@
                       (iter (until (ready-to-quit? wui-server))
                             (log.debug "Still not ready to quit, waiting...")
                             (sleep 1)))
-                    (log.info "Everything's down, exiting normally")
+                    (meta-model.info "Everything's down, exiting normally")
                     (format *debug-io* "Everything's down, exiting normally~%"))))))
         (quit 0))
     (give-up nil
