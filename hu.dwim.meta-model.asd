@@ -17,7 +17,7 @@
   :description "Various meta model classes and behavior"
   :depends-on (:cl-containers
                :command-line-arguments
-               :hu.dwim.common-lisp
+               :hu.dwim.common
                :hu.dwim.computed-class
                :hu.dwim.def+cl-l10n
                :hu.dwim.defclass-star
