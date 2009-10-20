@@ -161,7 +161,7 @@
                     (meta-model.info "Everything's down, exiting normally")
                     (format *debug-io* "Everything's down, exiting normally~%"))))))
         (quit 0))
-    (give-up nil
+    (abort nil
       :report (lambda (stream)
-                (format stream "Give up starting the image and quit"))
+                (format stream "Give up starting the image and quit the VM process with error code 2"))
       (quit 2))))
