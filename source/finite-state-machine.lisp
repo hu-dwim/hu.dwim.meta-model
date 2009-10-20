@@ -181,8 +181,8 @@
              (if transition
                  ;; we have a valid transition here
                  (let ((new-state (target-of transition)))
-                   (log.debug "Firing transition ~A from finite state machine ~A for state property ~A in ~A"
-                              (element-name-of transition) (element-name-of fsm) state-property object)
+                   (meta-model.debug "Firing transition ~A from finite state machine ~A for state property ~A in ~A"
+                                     (element-name-of transition) (element-name-of fsm) state-property object)
                    ;; handle on stay action
                    (if (eq state new-state)
                        (when (slot-boundp state 'on-stay-action)

@@ -44,8 +44,8 @@
       (iter (for instance = (pop *generated-instances*))
             (while (and instance (< *generated-instance-count* (getf *generate-args* :max 1e6))))
             (generate-associations instance)))
-    (log.debug "Generated ~a instances in ~,3f seconds"
-               *generated-instance-count* (/ (- (get-internal-run-time) start-time) internal-time-units-per-second))
+    (meta-model.debug "Generated ~a instances in ~,3f seconds"
+                      *generated-instance-count* (/ (- (get-internal-run-time) start-time) internal-time-units-per-second))
     *generated-instance-count*))
 
 ;;;;;;
@@ -67,7 +67,7 @@
                (aif (find-instanciable-subclass entity)
                     (generate-instance it))
                (bind ((instance (apply 'make-instance entity (collect-property-values entity))))
-                 (log.debug "Generated ~a" instance)
+                 (meta-model.debug "Generated ~a" instance)
                  (generate-properties instance)
                  (push instance *generated-instances*)
                  (incf *generated-instance-count*)
@@ -116,7 +116,7 @@
 (def function generate-associations (instance)
   (bind ((entity (entity-of instance)))
     (dolist (association-end (effective-association-ends-of entity))
-      (log.debug "Generating at association end ~a for instance ~a" association-end instance)
+      (meta-model.debug "Generating at association end ~a for instance ~a" association-end instance)
       (link-instance-with-associated-instances instance association-end))))
 
 (def generic link-instance-with-associated-instances (instance association-end)
@@ -139,7 +139,7 @@
                                             (random-integer min-cardinality max-cardinality)))
                   (current-cardinality (current-cardinality instance association-end)))
              (when (< current-cardinality required-cardinality)
-               (log.debug "Required cardinality at ~A ~A is ~A" instance association-end required-cardinality)
+               (meta-model.debug "Required cardinality at ~A ~A is ~A" instance association-end required-cardinality)
                (bind ((instances (collect-or-create-free-instances
                                   (- required-cardinality current-cardinality)
                                   (hu.dwim.perec::other-effective-association-end-for (hu.dwim.perec::associated-class-of association-end) association-end))))

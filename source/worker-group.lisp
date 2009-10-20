@@ -39,12 +39,12 @@
                        (lambda (condition)
                          (with-thread-name " / handling a serious condition"
                            (unless *debug-worker*
-                             (log.error "Got condition ~A within worker ~A in ~A skipping job ~A.~%~A"
-                                        condition worker worker-group job
-                                        ;; letting errors fly through here would not be funny...
-                                        (ignore-errors
-                                          (with-output-to-string (str)
-                                            (print-backtrace str))))
+                             (meta-model.error "Got condition ~A within worker ~A in ~A skipping job ~A.~%~A"
+                                               condition worker worker-group job
+                                               ;; letting errors fly through here would not be funny...
+                                               (ignore-errors
+                                                 (with-output-to-string (str)
+                                                   (print-backtrace str))))
                              (return-from run-job))))))
                    (with-thread-name " / running job"
                      (funcall job))))))
@@ -55,7 +55,7 @@
 (def function start-worker (worker-group &optional (worker-environment-function 'funcall))
   (with-lock-held ((worker-lock-of worker-group))
     (prog1-bind worker (make-instance 'worker :worker-group worker-group)
-      (log.debug "Staring new worker for ~A" worker-group)
+      (meta-model.debug "Staring new worker for ~A" worker-group)
       (setf (thread-of worker)
             (sb-thread:make-thread
              (lambda ()
@@ -66,7 +66,7 @@
       (push worker (workers-of worker-group)))))
 
 (def function stop-worker (worker)
-  (log.debug "Stopping worker ~A" worker)
+  (meta-model.debug "Stopping worker ~A" worker)
   (setf (keep-on-running-p worker) #f)
   (condition-notify (worker-condition-variable-of (worker-group-of worker))))
 
@@ -79,7 +79,7 @@
 
 (def function push-job (worker-group job)
   (with-lock-held ((job-lock-of worker-group))
-    (log.debug "Pushing new job ~A into ~A" job worker-group)
+    (meta-model.debug "Pushing new job ~A into ~A" job worker-group)
     (push job (jobs-of worker-group))
     (condition-notify (worker-condition-variable-of worker-group))))
 
@@ -88,7 +88,7 @@
     (with-lock-held (job-lock)
       (iter (until (funcall exit-condition))
             (when-bind job (pop (jobs-of worker-group))
-              (log.debug "Popping job ~A from ~A" job worker-group)
+              (meta-model.debug "Popping job ~A from ~A" job worker-group)
               (when (null (jobs-of worker-group))
                 (condition-notify (scheduler-condition-variable-of worker-group)))
               (return-from pop-job job))
