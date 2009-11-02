@@ -224,14 +224,16 @@
 
 (def generic get-statistics-param (model-element param-name &optional default)
   (:method ((entity entity) param-name &optional default)
-           (or (getf *generate-args* (concatenate-keyword param-name (element-name-of entity)))
-               (slot-value (statistics-of entity) (slot-symbol 'statistics param-name))
-               default))
+    (or (getf *generate-args* (format-symbol :keyword "~A~A"
+                                             param-name (element-name-of entity)))
+        (slot-value (statistics-of entity) (slot-symbol 'statistics param-name))
+        default))
   (:method ((association-end binary-association-end) param-name &optional default)
-           (or (getf *generate-args* (concatenate-keyword (element-name-of (hu.dwim.perec::association-of association-end))
-                                                          "/" (element-name-of association-end)))
-               (slot-value (statistics-of association-end) (slot-symbol 'statistics param-name))
-               default)))
+    (or (getf *generate-args* (format-symbol :keyword "~A/~A"
+                                             (element-name-of (hu.dwim.perec::association-of association-end))
+                                             (element-name-of association-end)))
+        (slot-value (statistics-of association-end) (slot-symbol 'statistics param-name))
+        default)))
 
 ;;;;;;
 ;;; Name 
