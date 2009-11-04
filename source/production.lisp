@@ -90,15 +90,14 @@
                 (cerror "Continue"
                         "Do you really want to start up in test mode with a database that does not contain \"-test\" in its name? (~S)."
                         database-name)))
+            (with-simple-restart (abort "Skip exporting model")
+              (with-model-transaction
+                (meta-model.info "Calling EXPORT-MODEL with database ~A, connection-specification ~A" (database-of *model*) (connection-specification-of *model*))
+                (export-model)))
+            (awhen (load-and-eval-config-file project-system-name)
+              (meta-model.info "Loaded config file ~A" it))
             (if repl
-                (progn
-                  (with-simple-restart (abort "Skip exporting model and start the REPL")
-                    (with-model-transaction
-                      (meta-model.info "Calling EXPORT-MODEL with database ~A, connection-specification ~A" (database-of *model*) (connection-specification-of *model*))
-                      (export-model)))
-                  (awhen (load-and-eval-config-file project-system-name)
-                    (meta-model.info "Loaded config file ~A" it))
-                  (sb-impl::toplevel-repl nil))
+                (sb-impl::toplevel-repl nil)
                 (with-pid-file pid-file
                   (disable-debugger)
                   (handler-bind ((hu.dwim.rdbms:unconfirmed-alter-table-error
@@ -113,8 +112,6 @@
                       (hu.dwim.model:startup-cluster-node cluster-name wui-server))
                     (hu.dwim.wui:startup-server wui-server)
                     (with-save-core-and-die-restart
-                      (awhen (load-and-eval-config-file project-system-name)
-                        (meta-model.info "Loaded config file ~A" it))
                       (block running
                         ;; TODO: put the timer stuff in hu.dwim.wui and remove dependency
                         (bind ((timer (hu.dwim.wui::timer-of wui-server)))
