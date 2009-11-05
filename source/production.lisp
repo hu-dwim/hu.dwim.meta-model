@@ -61,8 +61,9 @@
       (set-appenders 'hu.dwim.meta-model::audit dwim-appender (make-instance 'hu.dwim.model:persistent-appender)))))
 
 ;; TODO: factor this apart into utility functions for better reusability and more finer control in the end application
+;; TODO rename to... what? run-dwim-server? it won't return ever, and when C-c'd it'll call exit...
 (def (function e) startup-dwim-server (command-line-arguments project-system-name wui-server wui-application)
-  (restart-case 
+  (restart-case
       (progn
         (setup-logger project-system-name)
         (meta-model.info "~S toplevel init speaking" project-system-name)
@@ -90,7 +91,7 @@
                 (cerror "Continue"
                         "Do you really want to start up in test mode with a database that does not contain \"-test\" in its name? (~S)."
                         database-name)))
-            (with-simple-restart (abort "Skip exporting model")
+            (with-simple-restart (skip-export-model "Skip synchronizing the model in the VM with the database SQL schema")
               (with-model-transaction
                 (meta-model.info "Calling EXPORT-MODEL with database ~A, connection-specification ~A" (database-of *model*) (connection-specification-of *model*))
                 (export-model)))
