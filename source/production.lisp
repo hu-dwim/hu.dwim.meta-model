@@ -25,7 +25,11 @@
     ("test-mode"
      :type boolean
      :optional #t
-     :documentation "If provided then the server starts up in test mode. This allows to login with the same password for any subject.")))
+     :documentation "If provided then the server starts up in test mode. This allows to login with the same password for any subject.")
+    ("verbose"
+     :type boolean
+     :optional #t
+     :documentation "Try to provide more information about what's happening.")))
 
 (def (function e) ready-to-quit? (wui-server)
   (not (or (hu.dwim.wui:is-server-running? wui-server)
@@ -59,27 +63,33 @@
           (setf *package* project-package)
           (ensure-utf-8-external-format)
           ;; TODO: factor out the database arguments into rdbms
-          (bind (((&key database-host database-port database-name database-user-name database-password cluster-name pid-file swank-port repl test-mode &allow-other-keys) command-line-arguments)
+          (bind (((&key database-host database-port database-name database-user-name database-password cluster-name pid-file swank-port repl test-mode verbose &allow-other-keys) command-line-arguments)
                  (connection-specification `(:host ,database-host :port ,database-port :database ,database-name :user-name ,database-user-name :password ,database-password))
                  (cluster-name (or cluster-name
                                    (if (hu.dwim.wui:running-in-test-mode? wui-application)
                                        "test"
                                        "production"))))
-            (when repl
-              (incf swank-port))
             (start-swank-server swank-port)
-            (meta-model.info "Database connection is: ~S~%" connection-specification)
+            (when verbose
+              (bind ((standard-logger (find-logger 'standard-logger)))
+                (appendf (hu.dwim.logger::appenders-of standard-logger)
+                         (list (make-instance 'brief-stream-appender :stream *debug-io*)))
+                (setf (log-level standard-logger) +debug+)
+                (meta-model.debug "Set loggers to be verbose as requested by --verbose")))
+            (meta-model.info "Database connection is: ~S" connection-specification)
+            (unless (and database-host database-port database-name database-user-name database-password)
+              (warn "Database connection specification is not fully provided, which will most probably lead to an error: ~S" connection-specification))
             (setf (connection-specification-of *model*) connection-specification)
             (awhen test-mode
               (meta-model.info "Enabling test mode")
               (setf (hu.dwim.wui:running-in-test-mode? wui-application) #t)
               (unless (search "-test" database-name)
                 (cerror "Continue"
-                        "Do you really want to start up in test mode with a database that does not contain \"-test\" in its name? (~S)."
+                        "Do you really want to start up in test mode with a database name that does not contain \"-test\"? (~S)."
                         database-name)))
             (with-simple-restart (skip-export-model "Skip synchronizing the model in the VM with the database SQL schema")
+              (meta-model.info "Calling EXPORT-MODEL with database ~A, connection-specification ~A" (database-of *model*) (remove-from-plist (connection-specification-of *model*) :password))
               (with-model-transaction
-                (meta-model.info "Calling EXPORT-MODEL with database ~A, connection-specification ~A" (database-of *model*) (connection-specification-of *model*))
                 (export-model)))
             (awhen (load-and-eval-config-file project-system-name)
               (meta-model.info "Loaded config file ~A" it))
