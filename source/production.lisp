@@ -62,7 +62,7 @@
 
 ;; TODO: factor this apart into utility functions for better reusability and more finer control in the end application
 ;; TODO rename to... what? run-dwim-server? it won't return ever, and when C-c'd it'll call exit...
-(def (function e) startup-dwim-server (command-line-arguments project-system-name wui-server wui-application)
+(def (function e) run-production-server (command-line-arguments project-system-name wui-server wui-application)
   (restart-case
       (progn
         (setup-logger project-system-name)
