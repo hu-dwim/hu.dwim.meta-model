@@ -103,7 +103,7 @@
         (meta-model.info "Loaded config file ~A" it))
       (if repl
           (sb-impl::toplevel-repl nil)
-          (with-pid-file pid-file
+          (with-pid-file-logic (pid-file :optional #t)
             (disable-debugger)
             (handler-bind ((hu.dwim.rdbms:unconfirmed-schema-change
                             ;; NOTE: this handler is not bound in the started worker threads but EXPORT-MODEL is explicitly called at startup, so this is not a problem.
