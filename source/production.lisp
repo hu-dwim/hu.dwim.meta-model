@@ -116,54 +116,53 @@
                 #+nil
                 (hu.dwim.model:startup-cluster-node cluster-name wui-server))
               (hu.dwim.wui:startup-server wui-server)
-              (with-save-core-and-die-restart
-                (block running
-                  ;; TODO: put the timer stuff in hu.dwim.wui and remove dependency
-                  (bind ((timer (hu.dwim.wui::timer-of wui-server)))
-                    (flet ((running-signal-handler (signal code scp)
-                             (declare (ignore signal code scp))
-                             (meta-model.info "SIGTERM/SIGINT was received, initiating shutdown")
-                             (format *debug-io* "~%SIGTERM/SIGINT was received, initiating shutdown~%")
-                             (hu.dwim.wui:register-timer-entry timer (local-time:now)
-                                                               (named-lambda quit-now ()
-                                                                 (return-from running))
-                                                               :kind :single-shot
-                                                               :name "Quit now timer entry")))
-                      (hu.dwim.wui:register-timer-entry timer (* 60 10)
-                                                        (named-lambda stdout-ticker ()
-                                                          (format *debug-io* "~A: Another heartbeat at request number ~A; seems like all is well...~%"
-                                                                  (local-time:now) (awhen wui-server
-                                                                                     (hu.dwim.wui:processed-request-count-of it)))
-                                                          (finish-output *debug-io*))
-                                                        :kind :periodic
-                                                        :name "Standard output ticker")
-                      (hu.dwim.wui:register-timer-entry timer 60
-                                                        (named-lambda session-purge ()
-                                                          (with-model-database
-                                                            (hu.dwim.wui:purge-sessions wui-application)))
-                                                        :kind :periodic
-                                                        :name "Session purge")
-                      (hu.dwim.wui:register-timer-entry timer 5
-                                                        (named-lambda ready-to-quit-checker ()
-                                                          (when (ready-to-quit? wui-server)
-                                                            (return-from running)))
-                                                        :kind :periodic
-                                                        :name "Quit checker")
-                      (hu.dwim.wui:register-timer-entry timer 5
-                                                        'flush-caching-appenders
-                                                        :kind :periodic
-                                                        :name "Log flusher")
-                      (sb-sys:enable-interrupt sb-unix:sigterm #'running-signal-handler)
-                      (sb-sys:enable-interrupt sb-unix:sigint #'running-signal-handler)
-                      (meta-model.info "Final signal handlers are installed, everything's started normally. Calling into DRIVE-TIMER now...")
-                      (format *debug-io* "~A: Everything's started normally~%" (local-time:now))
-                      (hu.dwim.wui::drive-timer timer))))
-                #+nil
-                (hu.dwim.model:shutdown-cluster-node)
-                (hu.dwim.wui:shutdown-server wui-server)
-                (iter (until (ready-to-quit? wui-server))
-                      (meta-model.debug "Still not ready to quit, waiting...")
-                      (sleep 1))
-                (flush-caching-appenders))
+              (block running
+                ;; TODO: put the timer stuff in hu.dwim.wui and remove dependency
+                (bind ((timer (hu.dwim.wui::timer-of wui-server)))
+                  (flet ((running-signal-handler (signal code scp)
+                           (declare (ignore signal code scp))
+                           (meta-model.info "SIGTERM/SIGINT was received, initiating shutdown")
+                           (format *debug-io* "~%SIGTERM/SIGINT was received, initiating shutdown~%")
+                           (hu.dwim.wui:register-timer-entry timer (local-time:now)
+                                                             (named-lambda quit-now ()
+                                                               (return-from running))
+                                                             :kind :single-shot
+                                                             :name "Quit now timer entry")))
+                    (hu.dwim.wui:register-timer-entry timer (* 60 10)
+                                                      (named-lambda stdout-ticker ()
+                                                        (format *debug-io* "~A: Another heartbeat at request number ~A; seems like all is well...~%"
+                                                                (local-time:now) (awhen wui-server
+                                                                                   (hu.dwim.wui:processed-request-count-of it)))
+                                                        (finish-output *debug-io*))
+                                                      :kind :periodic
+                                                      :name "Standard output ticker")
+                    (hu.dwim.wui:register-timer-entry timer 60
+                                                      (named-lambda session-purge ()
+                                                        (with-model-database
+                                                          (hu.dwim.wui:purge-sessions wui-application)))
+                                                      :kind :periodic
+                                                      :name "Session purge")
+                    (hu.dwim.wui:register-timer-entry timer 5
+                                                      (named-lambda ready-to-quit-checker ()
+                                                        (when (ready-to-quit? wui-server)
+                                                          (return-from running)))
+                                                      :kind :periodic
+                                                      :name "Quit checker")
+                    (hu.dwim.wui:register-timer-entry timer 5
+                                                      'flush-caching-appenders
+                                                      :kind :periodic
+                                                      :name "Log flusher")
+                    (sb-sys:enable-interrupt sb-unix:sigterm #'running-signal-handler)
+                    (sb-sys:enable-interrupt sb-unix:sigint #'running-signal-handler)
+                    (meta-model.info "Final signal handlers are installed, everything's started normally. Calling into DRIVE-TIMER now...")
+                    (format *debug-io* "~A: Everything's started normally~%" (local-time:now))
+                    (hu.dwim.wui::drive-timer timer))))
+              #+nil
+              (hu.dwim.model:shutdown-cluster-node)
+              (hu.dwim.wui:shutdown-server wui-server)
+              (iter (until (ready-to-quit? wui-server))
+                    (meta-model.debug "Still not ready to quit, waiting...")
+                    (sleep 1))
+              (flush-caching-appenders)
               (meta-model.info "Everything's down, exiting normally")
               (format *debug-io* "Everything's down, exiting normally~%")))))))
