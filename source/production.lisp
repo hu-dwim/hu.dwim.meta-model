@@ -148,7 +148,7 @@
                                                         :kind :periodic
                                                         :name "Quit checker")
                       (hu.dwim.wui:register-timer-entry timer 5
-                                                        'flush-caching-appender-caches
+                                                        'flush-caching-appenders
                                                         :kind :periodic
                                                         :name "Log flusher")
                       (sb-sys:enable-interrupt sb-unix:sigterm #'running-signal-handler)
@@ -162,6 +162,6 @@
                 (iter (until (ready-to-quit? wui-server))
                       (meta-model.debug "Still not ready to quit, waiting...")
                       (sleep 1))
-                (flush-caching-appender-caches))
+                (flush-caching-appenders))
               (meta-model.info "Everything's down, exiting normally")
               (format *debug-io* "Everything's down, exiting normally~%")))))))
