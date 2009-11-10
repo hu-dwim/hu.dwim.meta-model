@@ -87,8 +87,8 @@
                 (sb-impl::toplevel-repl nil)
                 (with-pid-file pid-file
                   (disable-debugger)
-                  (handler-bind ((hu.dwim.rdbms:unconfirmed-alter-table-error
-                                  ;; NOTE: that this handler is not bound in the started threads but EXPORT-MODEL is explicitly called from STARTUP-CLUSTER-NODE, so this is not a problem.
+                  (handler-bind ((hu.dwim.rdbms:unconfirmed-schema-change
+                                  ;; NOTE: this handler is not bound in the started worker threads but EXPORT-MODEL is explicitly called at startup, so this is not a problem.
                                   (lambda (error)
                                     (best-effort-log-error "Exiting because something was tried to be altered in the RDBMS schema at unattended startup: ~A" error))))
                     (meta-model.info "Starting up cluster ~S" cluster-name)

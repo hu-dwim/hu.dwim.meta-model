@@ -54,7 +54,7 @@
 
 (def (function e) export-model ()
   (bind ((all-the-rest-confirmed? #f))
-    (handler-bind ((hu.dwim.rdbms:unconfirmed-alter-table-error
+    (handler-bind ((hu.dwim.rdbms:unconfirmed-schema-change
                     (lambda (error)
                       (declare (ignore error))
                       (when all-the-rest-confirmed?
@@ -64,7 +64,7 @@
                         (setf all-the-rest-confirmed? #t)
                         (continue))
                        :report-function (lambda (stream)
-                                          (format stream "~@<Accept this and all upcoming schema changes inside this call to export-model~@:>"))))
+                                          (format stream "~@<Accept this and all upcoming schema changes inside this invocation of export-model~@:>"))))
         (mapc #'hu.dwim.perec::ensure-exported (collect-entities))
         (hu.dwim.perec::finalize-persistent-classes)
         (hu.dwim.perec::finalize-persistent-associations)))))
