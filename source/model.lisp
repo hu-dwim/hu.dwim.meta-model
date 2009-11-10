@@ -59,12 +59,12 @@
                       (declare (ignore error))
                       (when all-the-rest-confirmed?
                         (continue)))))
-      (restart-bind ((accept-all
+      (restart-bind ((accept-schema-changes-and-continue
                       (lambda ()
                         (setf all-the-rest-confirmed? #t)
                         (continue))
                        :report-function (lambda (stream)
-                                          (format stream "~@<Accept this and all upcoming schema changes inside this invocation of export-model~@:>"))))
+                                          (format stream "~@<Mark that all upcoming schema changes should be ignored and invoke the CONTINUE restart~@:>"))))
         (mapc #'hu.dwim.perec::ensure-exported (collect-entities))
         (hu.dwim.perec::finalize-persistent-classes)
         (hu.dwim.perec::finalize-persistent-associations)))))
