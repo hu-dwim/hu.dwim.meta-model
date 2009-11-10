@@ -29,7 +29,11 @@
     ("verbose"
      :type boolean
      :optional #t
-     :documentation "Try to provide more information about what's happening.")))
+     :documentation "Try to provide more information about what's happening.")
+    ("export-model"
+     :type boolean
+     :optional #f
+     :documentation "When started in REPL mode, skip exporting the model into the RDBMS")))
 
 (def (function e) ready-to-quit? (wui-server)
   (not (or (hu.dwim.wui:is-server-running? wui-server)
@@ -60,8 +64,10 @@
     (setf *package* project-package)
     (ensure-utf-8-external-format)
     ;; TODO: factor out the database arguments into rdbms
-    (bind (((&key database-host database-port database-name database-user-name database-password cluster-name pid-file swank-port repl test-mode verbose &allow-other-keys) command-line-arguments)
+    (bind (((&key database-host database-port database-name database-user-name database-password
+                  cluster-name pid-file swank-port repl test-mode verbose (export-model #t) &allow-other-keys) command-line-arguments)
            (connection-specification `(:host ,database-host :port ,database-port :database ,database-name :user-name ,database-user-name :password ,database-password))
+           (loggable-connection-specification (remove-from-plist connection-specification :password))
            (cluster-name (or cluster-name
                              (if (hu.dwim.wui:running-in-test-mode? wui-application)
                                  "test"
@@ -73,9 +79,13 @@
                    (list (make-instance 'brief-stream-appender :stream *debug-io*)))
           (setf (log-level standard-logger) +debug+)
           (meta-model.debug "Set loggers to be verbose as requested by --verbose")))
-      (meta-model.info "Database connection is: ~S" connection-specification)
+      (when (and (not export-model)
+                 (not repl))
+        (cerror "Start in repl mode" "Skipping export-model is only allowed in REPL mode")
+        (setf repl #t))
+      (meta-model.info "Using database connection: ~S" loggable-connection-specification)
       (unless (and database-host database-port database-name database-user-name database-password)
-        (warn "Database connection specification is not fully provided, which will most probably lead to an error: ~S" connection-specification))
+        (warn "Database connection specification is not fully provided, which will most probably lead to an error: ~S" loggable-connection-specification))
       (setf (connection-specification-of *model*) connection-specification)
       (awhen test-mode
         (meta-model.info "Enabling test mode")
@@ -84,10 +94,11 @@
           (cerror "Continue"
                   "Do you really want to start up in test mode with a database name that does not contain \"-test\"? (~S)."
                   database-name)))
-      (with-simple-restart (skip-export-model "Skip synchronizing the model in the VM with the database SQL schema")
-        (meta-model.info "Calling EXPORT-MODEL with database ~A, connection-specification ~A" (database-of *model*) (remove-from-plist (connection-specification-of *model*) :password))
-        (with-model-transaction
-          (export-model)))
+      (when export-model
+        (with-simple-restart (skip-export-model "Skip synchronizing the model in the VM with the database SQL schema")
+          (meta-model.info "Calling EXPORT-MODEL with database ~A, connection-specification ~A" (database-of *model*) loggable-connection-specification)
+          (with-model-transaction
+            (export-model))))
       (awhen (load-and-eval-config-file project-system-name)
         (meta-model.info "Loaded config file ~A" it))
       (if repl
