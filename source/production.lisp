@@ -35,37 +35,23 @@
            #+nil
            (hu.dwim.model:is-cluster-node-running?))))
 
-(def (function e) setup-logger (project-system-name)
+(def function setup-loggers-for-production (project-system-name)
   (setf *log-directory* (format nil "/var/log/~A/" (string-downcase project-system-name)))
   (unless (ignore-errors
             (truename *log-directory*))
-    (error "Log directory does not exist: ~S" *log-directory*))
-  (bind ((error-appender (make-level-filter-appender +warn+ (make-thread-safe-file-appender "error.log")))
-         (dwim-appender (make-thread-safe-file-appender "dwim.log")))
-    ;; TODO: put in hu.dwim.logger?
-    (flet ((set-appenders (logger-name &rest appender-designators)
-             ;; TODO: KLUDGE: remove this level setting
-             (setf (log-level (find-logger logger-name)) +info+)
-             (setf (hu.dwim.logger::appenders-of (find-logger logger-name))
-                   (list* error-appender
-                          (mapcar (lambda (appender-designator)
-                                    (etypecase appender-designator
-                                      (string (make-thread-safe-file-appender appender-designator))
-                                      (appender appender-designator)))
-                                  appender-designators)))))
-      (set-appenders 'hu.dwim.wui::wui "wui.log")
-      (set-appenders 'hu.dwim.rdbms::rdbms "rdbms.log")
-      (set-appenders 'hu.dwim.rdbms::sql "sql.log")
-      (set-appenders 'hu.dwim.meta-model::meta-model dwim-appender)
-      #+nil
-      (set-appenders 'hu.dwim.meta-model::audit dwim-appender (make-instance 'hu.dwim.model:persistent-appender)))))
+    (error "Log directory does not exist or is not accessible. Tried: ~S" *log-directory*))
+  (bind ((standard-logger (find-logger 'standard-logger)))
+    (setf (hu.dwim.logger::appenders-of standard-logger)
+          (list (make-level-filtering-appender +warn+ (make-thread-safe-file-appender "error.log"))
+                (make-thread-safe-file-appender "root.log")))
+    (setf (log-level standard-logger) +info+)))
 
 ;; TODO: factor this apart into utility functions for better reusability and more finer control in the end application
 ;; TODO rename to... what? run-dwim-server? it won't return ever, and when C-c'd it'll call exit...
 (def (function e) run-production-server (command-line-arguments project-system-name wui-server wui-application)
   (restart-case
       (progn
-        (setup-logger project-system-name)
+        (setup-loggers-for-production project-system-name)
         (meta-model.info "~S toplevel init speaking" project-system-name)
         (bind ((project-system (asdf:find-system project-system-name))
                (project-package (find-package (system-package-name project-system))))
@@ -143,6 +129,10 @@
                                                                   (return-from running)))
                                                               :kind :periodic
                                                               :name "Quit checker")
+                            (hu.dwim.wui:register-timer-entry timer 5
+                                                              'flush-caching-appender-caches
+                                                              :kind :periodic
+                                                              :name "Log flusher")
                             (sb-sys:enable-interrupt sb-unix:sigterm #'running-signal-handler)
                             (sb-sys:enable-interrupt sb-unix:sigint #'running-signal-handler)
                             (meta-model.info "Final signal handlers are installed, everything's started normally. Calling into DRIVE-TIMER now...")
@@ -153,7 +143,8 @@
                       (hu.dwim.wui:shutdown-server wui-server)
                       (iter (until (ready-to-quit? wui-server))
                             (meta-model.debug "Still not ready to quit, waiting...")
-                            (sleep 1)))
+                            (sleep 1))
+                      (flush-caching-appender-caches))
                     (meta-model.info "Everything's down, exiting normally")
                     (format *debug-io* "Everything's down, exiting normally~%"))))))
         (quit 0))
