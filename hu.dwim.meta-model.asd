@@ -24,10 +24,12 @@
                :hu.dwim.delico
                :hu.dwim.logger+threads
                :hu.dwim.perec.postgresql
+               :hu.dwim.perec+iolib
                :hu.dwim.syntax-sugar
                :hu.dwim.util
                :hu.dwim.walker
                :hu.dwim.wui
+               :iolib.sockets
                :local-time
                :metacopy-with-contextl
                :trivial-garbage)
