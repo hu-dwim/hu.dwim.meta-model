@@ -7,30 +7,30 @@
 (in-package :hu.dwim.meta-model)
 
 (def (constant e) +generic-command-line-options+
-  '(("cluster-name"
-     :type string
-     :initial-value "production"
-     :documentation "The cluster name as stored in the database. Configuration of this cluster node is read from the database by looking up the computer's network name.")
-    ("pid-file"
-     :type string
-     :documentation "The PID file is created when the server starts. The file will be deleted when the server stops.")
-    ("swank-port"
-     :type integer
-     :initial-value 4005
-     :documentation "The port is used to connect to the running server with SLIME.")
-    ("repl"
-     :type boolean
-     :optional #t
-     :documentation "If provided then instead of starting the server only a REPL will be started. This might be useful for mainenance, testing and bug fixing.")
-    ("test-mode"
-     :type boolean
-     :optional #t
-     :documentation "If provided then the server starts up in test mode. This allows to login with the same password for any subject.")
-    ("verbose"
+  '((("verbose" #\Space)
      :type boolean
      :optional #t
      :documentation "Try to provide more information about what's happening.")
-    ("export-model"
+    (("cluster-name" #\Space)
+     :type string
+     :initial-value "production"
+     :documentation "The cluster name as stored in the database. Configuration of this cluster node is read from the database by looking up the computer's network name.")
+    (("pid-file" #\Space)
+     :type string
+     :documentation "The PID file is created when the server starts. The file will be deleted when the server stops.")
+    (("swank-port" #\Space)
+     :type integer
+     :initial-value 4005
+     :documentation "The port is used to connect to the running server with SLIME.")
+    (("repl" #\Space)
+     :type boolean
+     :optional #t
+     :documentation "If provided then instead of starting the server only a REPL will be started. This might be useful for mainenance, testing and bug fixing.")
+    (("test-mode" #\Space)
+     :type boolean
+     :optional #t
+     :documentation "If provided then the server starts up in test mode. This allows to login with the same password for any subject.")
+    (("export-model" #\Space)
      :type boolean
      :optional #f
      :documentation "When started in REPL mode, skip exporting the model into the RDBMS")))
