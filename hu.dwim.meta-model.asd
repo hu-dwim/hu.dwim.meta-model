@@ -26,7 +26,7 @@
                :hu.dwim.perec.postgresql
                :hu.dwim.perec+iolib
                :hu.dwim.syntax-sugar
-               :hu.dwim.util
+               :hu.dwim.util.all
                :hu.dwim.walker
                :hu.dwim.wui
                :iolib.sockets
@@ -38,13 +38,12 @@
                              (:file "authentication" :depends-on ("entity" "subject" "change-notification"))
                              (:file "authorization" :depends-on ("authentication"))
                              (:file "change-notification" :depends-on ("model"))
-                             (:file "configuration" :depends-on ("package"))
                              (:file "entity" :depends-on ("statistics" "generalization" "association" "type"))
                              (:file "entity-relationship-diagram" :depends-on ("entity" "structure-diagram"))
                              (:file "finite-state-machine" :depends-on ("entity"))
                              (:file "generalization" :depends-on ("relationship"))
                              (:file "generate" :depends-on ("state-property" "persistent-process"))
-                             (:file "logger" :depends-on ("configuration"))
+                             (:file "logger" :depends-on ("package"))
                              (:file "meta-model" :depends-on ("util"))
                              (:file "model" :depends-on ("model-element" "logger"))
                              (:file "model-element" :depends-on ("meta-model"))
@@ -59,6 +58,6 @@
                              (:file "statistics" :depends-on ("model"))
                              (:file "structure-diagram" :depends-on ("relationship"))
                              (:file "subject" :depends-on ("entity" "property"))
-                             (:file "type" :depends-on ("configuration"))
-                             (:file "util" :depends-on ("configuration"))
-                             (:file "worker-group" :depends-on ("configuration"))))))
+                             (:file "type" :depends-on ("package"))
+                             (:file "util" :depends-on ("package"))
+                             (:file "worker-group" :depends-on ("logger"))))))

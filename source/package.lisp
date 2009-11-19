@@ -4,9 +4,9 @@
 ;;;
 ;;; See LICENCE for details.
 
-(in-package :common-lisp-user)
+(in-package :hu.dwim.util)
 
-(defpackage :hu.dwim.meta-model
+(def package :hu.dwim.meta-model
   (:use :bordeaux-threads
         :cl-containers
         :cl-l10n
@@ -66,4 +66,8 @@
            #:show-to-subjects-matching-expression
 
            ;; needed by dwim-presentation
-           #:identifier-of))
+           #:identifier-of)
+
+  (:readtable-setup
+   (enable-standard-hu.dwim-syntaxes)
+   (hu.dwim.syntax-sugar:enable-lambda-with-bang-args-syntax)))
