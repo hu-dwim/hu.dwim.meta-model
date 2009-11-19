@@ -34,6 +34,7 @@
                                    (not (keep-on-running-p worker)))))
              (when job
                (block run-job
+                 ;; TODO use hu.dwim.util:with-layered-error-handlers and other error handling stuff
                  (handler-bind
                      ((serious-condition
                        (lambda (condition)
