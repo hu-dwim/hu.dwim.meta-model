@@ -9,32 +9,12 @@
 ;;;;;;
 ;;; Predefined types
 
-(def persistent-type unspecified ()
-  "The abstract type to model values that were not specified by the user, unbound slot at the implementation level."
-  'unbound)
-
-(def persistent-type specified-no-value ()
-  "It is a single value type which means that the property is not applicable, basically nil at the implementation level."
-  'null)
-
 (def persistent-type alphanumeric-text (&optional maximum-length minimum-length)
   `(text ,maximum-length ,minimum-length "qwertzuiopasdfghjklyxcvbnmQWERTZUIOPASDFGHJKLLYXCVBNM0123456789"))
 
 (def persistent-type standard-text ()
   "A resonable length text."
   '(text 100))
-
-(def persistent-type html-text (&optional maximum-length)
-  "Formatted text that may contain various fonts, styles and colors as in XHTML."
-  `(text ,maximum-length))
-
-(def persistent-type standard-html-text ()
-  "HTML-TEXT with a predefined MAXIMUM-LENGTH."
-  `(html-text #.(* 1024 64)))
-
-(def persistent-type standard-symbol ()
-  "A resonable length symbol."
-  '(symbol* 100))
 
 (def function percentage? (value)
   (<= 0.0 value 1.0))
