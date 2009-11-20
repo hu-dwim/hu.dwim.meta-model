@@ -9,59 +9,59 @@
 ;;;;;;
 ;;; Predefined types
 
-(def ptype unspecified ()
+(def persistent-type unspecified ()
   "The abstract type to model values that were not specified by the user, unbound slot at the implementation level."
   'unbound)
 
-(def ptype specified-no-value ()
+(def persistent-type specified-no-value ()
   "It is a single value type which means that the property is not applicable, basically nil at the implementation level."
   'null)
 
-(def ptype alphanumeric-text (&optional maximum-length minimum-length)
+(def persistent-type alphanumeric-text (&optional maximum-length minimum-length)
   `(text ,maximum-length ,minimum-length "qwertzuiopasdfghjklyxcvbnmQWERTZUIOPASDFGHJKLLYXCVBNM0123456789"))
 
-(def ptype standard-text ()
+(def persistent-type standard-text ()
   "A resonable length text."
   '(text 100))
 
-(def ptype html-text (&optional maximum-length)
+(def persistent-type html-text (&optional maximum-length)
   "Formatted text that may contain various fonts, styles and colors as in XHTML."
   `(text ,maximum-length))
 
-(def ptype standard-html-text ()
+(def persistent-type standard-html-text ()
   "HTML-TEXT with a predefined MAXIMUM-LENGTH."
   `(html-text #.(* 1024 64)))
 
-(def ptype standard-symbol ()
+(def persistent-type standard-symbol ()
   "A resonable length symbol."
   '(symbol* 100))
 
-(def function percentage-p (value)
+(def function percentage? (value)
   (<= 0.0 value 1.0))
 
-(def ptype percentage ()
+(def persistent-type percentage ()
   "This is a value in the range [0, 1] representing a percentage."
   '(and float-32
-        (satisfies percentage-p)))
+        (satisfies percentage?)))
 
-(def ptype url (&optional maximum-length)
+(def persistent-type url (&optional maximum-length)
   "Uniform Resource Locator"
   `(text ,maximum-length))
 
-(def ptype standard-url ()
+(def persistent-type standard-url ()
   "A resonable length Uniform Resource Locator"
   '(url 100))
 
-(def ptype rgb-code ()
+(def persistent-type rgb-code ()
   'integer-32)
 
-(def ptype email-address ()
+(def persistent-type email-address ()
   '(text 100))
 
-(def ptype phone-number ()
+(def persistent-type phone-number ()
   '(text 16 0 "1234567890+-/ ()"))
 
-(def ptype image-from-static-file (base-path)
+(def persistent-type image-from-static-file (base-path)
   "A type that will be rendered as <img href='base-path/value'/>"
   (declare (ignore base-path))
   '(text 100))
@@ -69,19 +69,19 @@
 ;;;;;;
 ;;; SI
 
-(def ptype length ()
+(def persistent-type length ()
   "In meters"
   'number)
 
-(def ptype area ()
+(def persistent-type area ()
   "In square meters"
   'number)
 
-(def ptype volume ()
+(def persistent-type volume ()
   "In cubic meters"
   'number)
 
-(def ptype velocity ()
+(def persistent-type velocity ()
   "In meter per seconds"
   'number)
 

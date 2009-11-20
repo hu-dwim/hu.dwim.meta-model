@@ -115,7 +115,7 @@
                                            :source ,(second transition)
                                            :target ,(third transition)))
                        transitions))))
-      (def ptype ,state-type-name ()
+      (def persistent-type ,state-type-name ()
         `(member ,@(states-of (find-finite-state-machine ',name)))))))
 
 (def (definer e :available-flags "e") finite-state-machine (name &body forms)

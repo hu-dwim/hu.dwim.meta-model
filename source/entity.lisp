@@ -87,7 +87,7 @@
          (declare (ignore ,@slot-names))
          `(select-similar-instances ,',class-name ,@args))
        (export ',multi-selector-name)
-       (def pclass* ,class-name ,super-entities ,processed-slots
+       (def persistent-class* ,class-name ,super-entities ,processed-slots
             ,@`((:metaclass ,metaclass)
                 (:export-class-name-p #t)
                 (:export-accessor-names-p #t)

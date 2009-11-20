@@ -217,7 +217,7 @@
 (def entity wait-for-timestamp (wait-reason)
   ((wait-until :type timestamp :primary #t :reference #t)))
 
-(def ptype milestone ()
+(def persistent-type milestone ()
   'integer-32)
 
 (def entity wait-for-milestone (wait-reason)
@@ -228,7 +228,7 @@
   ((:type standard-persistent-process)
    (:type (set wait-for-milestone))))
 
-(def ptype activity ()
+(def persistent-type activity ()
   'integer-32)
 
 (def entity wait-for-activity (wait-reason)
