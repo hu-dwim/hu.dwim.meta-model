@@ -125,7 +125,8 @@
                            (format *debug-io* "~%SIGTERM/SIGINT was received, initiating shutdown~%")
                            (hu.dwim.wui:register-timer-entry timer (local-time:now)
                                                              (named-lambda quit-now ()
-                                                               (return-from running))
+                                                               (format *debug-io* "Aborting timer from the QUIT-NOW timer entry~%")
+                                                               (hu.dwim.wui:drive-timer/abort))
                                                              :kind :single-shot
                                                              :name "Quit now timer entry")))
                     (hu.dwim.wui:register-timer-entry timer (* 60 10)
