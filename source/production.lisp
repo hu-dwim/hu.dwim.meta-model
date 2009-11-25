@@ -78,8 +78,6 @@
           (appendf (hu.dwim.logger::appenders-of standard-logger)
                    (list (make-instance 'brief-stream-appender :stream *debug-io*)))
           (setf (log-level standard-logger) +debug+)
-          ;; KLUDGE read-from-string
-          (setf (log-level (read-from-string "hu.dwim.wui::timer")) +info+)
           (meta-model.debug "Set loggers to be verbose as requested by --verbose")))
       (when (and (not export-model)
                  (not repl))
