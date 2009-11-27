@@ -133,7 +133,7 @@
                                                       (named-lambda stdout-ticker ()
                                                         (format *debug-io* "~A: Another heartbeat at request number ~A; seems like all is well...~%"
                                                                 (local-time:now) (awhen wui-server
-                                                                                   (hu.dwim.wui:processed-request-count-of it)))
+                                                                                   (hu.dwim.wui:processed-request-counter-of it)))
                                                         (finish-output *debug-io*))
                                                       :kind :periodic
                                                       :name "Standard output ticker")
