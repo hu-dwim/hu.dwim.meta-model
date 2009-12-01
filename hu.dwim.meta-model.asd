@@ -22,7 +22,7 @@
                :hu.dwim.def+cl-l10n
                :hu.dwim.defclass-star
                :hu.dwim.delico
-               :hu.dwim.logger+threads
+               :hu.dwim.logger
                :hu.dwim.perec.postgresql
                :hu.dwim.perec+iolib
                :hu.dwim.syntax-sugar
