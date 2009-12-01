@@ -10,11 +10,7 @@
 
 (defsystem :hu.dwim.meta-model
   :class hu.dwim.system
-  :author ("Attila Lendvai <attila.lendvai@gmail.com>"
-           "Levente Mészáros <levente.meszaros@gmail.com>"
-           "Tamás Borbély <tomi.borbely@gmail.com>")
-  :licence "BSD / Public domain"
-  :description "Various meta model classes and behavior"
+  :description "Various meta model classes."
   :depends-on (:cl-containers
                :command-line-arguments
                :hu.dwim.common

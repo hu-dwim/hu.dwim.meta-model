@@ -10,11 +10,6 @@
 
 (defsystem :hu.dwim.meta-model.documentation
   :class hu.dwim.documentation-system
-  :author ("Levente Mészáros <levente.meszaros@gmail.com>"
-           "Attila Lendvai <attila.lendvai@gmail.com>"
-           "Tamás Borbély <tomi.borbely@gmail.com>")
-  :licence "BSD / Public domain"
-  :description "Documentation for hu.dwim.meta-model"
   :depends-on (:hu.dwim.meta-model.test
                :hu.dwim.wui)
   :components ((:module "documentation"
