@@ -28,45 +28,24 @@
   (:shadowing-import-from :iterate
                           #:finish)
 
-  (:shadowing-import-from :hu.dwim.perec
-                          #:set)
-  
-  (:shadow #:defassociation
-           #:login
+  (:shadow #:login
            #:model
            #:element
            #:random-string
            #:parent
            #:code
            #:result
-           #:image
-           #:color
-           #:transaction-mixin
-           #:find-association)
+           #:transaction-mixin)
 
   (:import-from :hu.dwim.perec
                 #:compute-as)
 
-  (:export #:login
-           #:logout
-
-           ;; authorization
-           #:-operation-
-           #:-instance-
+  (:export #:-instance-
            #:-entity-
            #:-property-
            #:-authenticated-subject-
            #:-effective-subject-
-           #:top-level-authorization
-
-           ;; these are defined in wui and not in any dwim file
-           #:show-maybe
-           #:show-to-subject
-           #:show-to-current-effective-subject
-           #:show-to-subjects-matching-expression
-
-           ;; needed by dwim-presentation
-           #:identifier-of)
+           #:top-level-authorization)
 
   (:readtable-setup
    (enable-standard-hu.dwim-syntaxes)

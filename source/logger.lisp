@@ -10,8 +10,6 @@
 
 (def logger loading (meta-model))
 
-(def logger image (meta-model))
-
 (def logger notification (meta-model))
 
 (def logger process (meta-model))

@@ -113,7 +113,7 @@
                     (list :slot (slot-for-type type)))
                   association-end))))
       `(progn
-         (defassociation*
+         (def persistent-association*
            (,(process-association-end primary-association-end secondary-association-end)
              ,(process-association-end secondary-association-end primary-association-end))
            ,@options

@@ -299,9 +299,6 @@
   (:method ((type text-type) &key (length 10) &allow-other-keys)
            (random-string length "abcdefghijklmnopqrstuvwxyz "))
 
-  (:method ((type html-text-type) &key (length 10) &allow-other-keys)
-           (random-string length "abcdefghijklmnopqrstuvwxyz "))
-
   (:method ((type (eql (find-type 'percentage))) &key &allow-other-keys)
            (random-number 0.0 1.0))
 
