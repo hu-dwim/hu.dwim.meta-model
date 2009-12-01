@@ -17,12 +17,3 @@
   (bind ((name (string-downcase (symbol-name symbol))))
     (intern (string-upcase (hungarian-plural-of name))
             (symbol-package symbol))))
-
-(defun hash-value-of (key hashtable)
-  (gethash (key-for key) hashtable))
-
-(defun (setf hash-value-of) (value key hashtable)
-  (setf (gethash (key-for key) hashtable) value))
-
-(defun remove-hash-value-of (key hashtable)
-  (remhash (key-for key) hashtable))

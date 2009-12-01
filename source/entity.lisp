@@ -258,7 +258,3 @@
   (assert (typep instance 'persistent-object))
   (prog1-bind entity (class-of instance)
     (assert (typep entity 'entity))))
-
-(def method key-for ((instance persistent-object))
-  "Used to calculate the key for hashtable access."
-  (oid-of instance))
