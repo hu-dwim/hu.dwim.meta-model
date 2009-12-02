@@ -6,6 +6,8 @@
 
 (in-package :hu.dwim.meta-model)
 
+;;;; TODO: move this to util, because it is quite general
+
 ;;;;;;
 ;;; Worker threads
 
@@ -40,12 +42,12 @@
                        (lambda (condition)
                          (with-thread-name " / handling a serious condition"
                            (unless *debug-worker*
+                             ;; TODO: follow error handling changes and support in util
                              (meta-model.error "Got condition ~A within worker ~A in ~A skipping job ~A.~%~A"
                                                condition worker worker-group job
                                                ;; letting errors fly through here would not be funny...
                                                (ignore-errors
-                                                 (with-output-to-string (str)
-                                                   (print-backtrace str))))
+                                                 (build-backtrace-string condition)))
                              (return-from run-job))))))
                    (with-thread-name " / running job"
                      (funcall job))))))
