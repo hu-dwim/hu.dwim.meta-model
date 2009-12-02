@@ -222,17 +222,22 @@
              10
              max-cardinality))))
 
+(def function slot-name-for-initarg (class-name initarg-name)
+  "Creates a slot name from the class and initarg symbols."
+  (intern (symbol-name initarg-name) (symbol-package class-name)))
+
 (def generic get-statistics-param (model-element param-name &optional default)
   (:method ((entity entity) param-name &optional default)
     (or (getf *generate-args* (format-symbol :keyword "~A~A"
                                              param-name (element-name-of entity)))
-        (slot-value (statistics-of entity) (slot-symbol 'statistics param-name))
+        (slot-value (statistics-of entity) (slot-name-for-initarg 'statistics param-name))
         default))
+
   (:method ((association-end binary-association-end) param-name &optional default)
     (or (getf *generate-args* (format-symbol :keyword "~A/~A"
                                              (element-name-of (hu.dwim.perec::association-of association-end))
                                              (element-name-of association-end)))
-        (slot-value (statistics-of association-end) (slot-symbol 'statistics param-name))
+        (slot-value (statistics-of association-end) (slot-name-for-initarg 'statistics param-name))
         default)))
 
 ;;;;;;
