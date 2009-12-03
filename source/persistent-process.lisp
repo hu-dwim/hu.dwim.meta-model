@@ -463,50 +463,31 @@
 ;;;;;;
 ;;; Put persistent process in final states and stop execution
 
-;; TODO this should be called automatically by the statemachine
-(def generic process-state-changed (process)
-  (:method ((process standard-persistent-process))
-    (values)))
+(def (function e) pause-persistent-process (process)
+  (process.debug "Pausing persistent process ~A" process)
+  (process-event process 'process-state 'pause))
 
-;; TODO shouldn't the invocation of these be attached as callbacks on the state-machine transitions?
-;; in tandem with a shorter alias for (process-event process 'process-state ...)?
-(def generic pause-persistent-process (process)
-  (:method (process)
-           (process.debug "Pausing persistent process ~A" process)
-           (process-event process 'process-state 'pause)))
+(def (function e) finish-persistent-process (process &optional result)
+  (process.debug "Finishing persistent process ~A" process)
+  (process-event process 'process-state 'finish)
+  (%finish-persistent-process process result))
 
-(def (generic e) finish-persistent-process (process &optional result)
-  (:method ((process standard-persistent-process) &optional result)
-    (process.debug "Finishing persistent process ~A" process)
-    (process-event process 'process-state 'finish)
-    (process-state-changed process)
-    (%finish-persistent-process process result)))
+(def (function e) fail-persistent-process (process &optional result)
+  (process.debug "Failing persistent process ~A" process)
+  (process-event process 'process-state 'fail)
+  (%finish-persistent-process process result))
 
-(def generic fail-persistent-process (process &optional result)
-  (:method ((process standard-persistent-process) &optional result)
-           (process.debug "Failing persistent process ~A" process)
-           (process-event process 'process-state 'fail)
-           (process-state-changed process)
-           (%finish-persistent-process process result)))
+(def (function e) cancel-persistent-process (process &optional result)
+  (process.debug "Cancelling persistent process ~A" process)
+  (process-event process 'process-state 'cancel)
+  (%finish-persistent-process process result))
 
-(def (generic e) cancel-persistent-process (process &optional result)
-  (:method (process &optional result)
-           (process.debug "Cancelling persistent process ~A" process)
-           (process-event process 'process-state 'cancel)
-           (%finish-persistent-process process result)))
-
-(def generic die-persistent-process (process)
-  (:method ((process standard-persistent-process))
-           (process.debug "Dying persistent process ~A" process)
-           (process-event process 'process-state 'die)
-           (process-state-changed process)
-           (slot-makunbound process 'result)
-           (destroy-continuation process)
-           (values)))
-
-(export '(process-state-changed
-          die-persistent-process cancel-persistent-process
-          fail-persistent-process finish-persistent-process))
+(def (function e) die-persistent-process (process)
+  (process.debug "Dying persistent process ~A" process)
+  (process-event process 'process-state 'die)
+  (slot-makunbound process 'result)
+  (destroy-continuation process)
+  (values))
 
 (def (function e) persistent-process-initializing-p (process)
   (eq (element-name-of (process-state-of process)) 'initializing))
