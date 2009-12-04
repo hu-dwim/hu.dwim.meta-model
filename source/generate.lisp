@@ -334,12 +334,6 @@
   (bind ((factor (random-integer 1 100)))
     (/ (random-integer (* factor min) (* factor max)) factor)))
 
-(def function random-string (length &optional (alphabet "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"))
-  (bind ((str (make-string length)))
-    (loop for i from 0 below length
-          do (setf (char str i) (random-char alphabet)))
-    str))
-
 (def function random-symbol ()
   'random-symbol)
 

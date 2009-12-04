@@ -31,7 +31,6 @@
   (:shadow #:login
            #:model
            #:element
-           #:random-string
            #:parent
            #:code
            #:result
