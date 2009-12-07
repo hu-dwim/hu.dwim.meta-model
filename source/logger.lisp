@@ -8,19 +8,17 @@
 
 (def logger meta-model ())
 
-(def logger loading (meta-model))
-
 (def logger notification (meta-model))
 
 (def logger process (meta-model))
 
 (def logger scheduler (process) :runtime-level +info+)
 
-(def logger authentication (meta-model))
+(def (logger e) authentication (meta-model))
 
-(def logger authorization (meta-model))
+(def (logger e) authorization (meta-model))
 
 ;; a separate branch for audit messages, only delegating to standard-logger.
 ;; later on, one can install a persistent appender to store audit messages in the database.
 (def (logger e) audit ())
-(def logger login (audit))
+(def (logger e) login (audit))
