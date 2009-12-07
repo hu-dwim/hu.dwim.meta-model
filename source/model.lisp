@@ -55,16 +55,15 @@
 (def (function e) export-model ()
   (bind ((all-the-rest-confirmed? #f))
     (handler-bind ((hu.dwim.rdbms:unconfirmed-schema-change
-                    (lambda (error)
-                      (declare (ignore error))
+                    (lambda (condition)
                       (when all-the-rest-confirmed?
-                        (continue)))))
-      (restart-bind ((accept-schema-changes-and-continue
+                        (hu.dwim.rdbms:continue-with-schema-change condition)))))
+      (restart-bind ((accept-all-schema-changes
                       (lambda ()
                         (setf all-the-rest-confirmed? #t)
-                        (continue))
+                        (hu.dwim.rdbms:continue-with-schema-change))
                        :report-function (lambda (stream)
-                                          (format stream "~@<Mark that all upcoming schema changes should be ignored and invoke the CONTINUE restart~@:>"))))
+                                          (format stream "~@<Confirm this and all upcoming schema changes inside this call to ~S without entering the debugger~@:>" 'export-model))))
         (mapc #'hu.dwim.perec::ensure-exported (collect-entities))
         (hu.dwim.perec::finalize-persistent-classes)
         (hu.dwim.perec::finalize-persistent-associations)))))
