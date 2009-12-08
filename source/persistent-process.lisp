@@ -111,7 +111,7 @@
 
 (def function make-persistent-process-closure (form)
   (hu.dwim.delico::make-closure/cc
-   (walk-form
+   (hu.dwim.walker:walk-form
     (with-unique-names (result)
       `(lambda ()
          (let ((,result ,form))

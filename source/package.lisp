@@ -20,7 +20,7 @@
         :hu.dwim.perec
         :hu.dwim.syntax-sugar
         :hu.dwim.util
-        :hu.dwim.walker
+        ;; there shouldn't be many references to :hu.dwim.walker, so just prefix the usages...
         :local-time
         :metacopy-with-contextl
         :trivial-garbage)
