@@ -46,6 +46,7 @@
   (write-string " ")
   (princ (best-effort-slot-value -self- 'name)))
 
+;; TODO delme? rename?
 (def (generic e) developer-p (subject)
   (:method (subject)
     #f))
