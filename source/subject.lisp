@@ -27,7 +27,7 @@
 (macrolet ((define-technical-subject (name)
              (bind ((variable-name (symbolicate '#:* (string-upcase name) '#:-technical-subject*)))
                `(progn
-                  (def singleton-persistent-instance ,variable-name
+                  (def (singleton-persistent-instance e) ,variable-name
                       (or (select-technical-subject :name ,name)
                           (make-technical-subject :name ,name)))
                   (def (macro e) ,(symbolicate '#:with- (string-upcase name) '#:-technical-subject) (&body forms)
