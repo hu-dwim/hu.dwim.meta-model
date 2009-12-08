@@ -15,7 +15,7 @@
 
 (def (constant e) +failed-authentication-warning-limit+ 10)
 
-(def persistent-type http-agent-name ()
+(def persistent-type http-user-agent-name ()
   `(text ,+maximum-http-agent-identifier-length+))
 
 (def entity authentication-instrument ()
@@ -41,8 +41,8 @@
    (remote-ip-address
     :type (or null ip-address)
     :primary #t)
-   (http-agent
-    :type (or null http-agent-name)
+   (http-user-agent
+    :type (or null http-user-agent-name)
     :primary #t)
    (web-application
     :type (or null (text 64))
@@ -100,7 +100,7 @@
   (slot-name.login-at "login at")
   (slot-name.logout-at "logout at")
   (authenticated-session.web-application "application")
-  (slot-name.http-agent "http agent")
+  (slot-name.http-user-agent "http agent")
   (slot-name.authenticated-subject "authenticated subject")
   (slot-name.effective-subject "effective subject")
   (slot-name.authenticated-sessions "sessions")
@@ -126,7 +126,7 @@
   (slot-name.login-at "belépés időpontja")
   (slot-name.logout-at "kilépés időpontja")
   (authenticated-session.web-application "alkalmazás")
-  (slot-name.http-agent "http kliens")
+  (slot-name.http-user-agent "http kliens")
   (slot-name.authenticated-subject "azonosított alany")
   (slot-name.effective-subject "effektív alany")
   (slot-name.authenticated-sessions "belépések")
