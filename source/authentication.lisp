@@ -175,64 +175,7 @@
 ;;;;;;
 ;;; Authenticate
 
-(def (generic e) authenticate (authentication-information)
-  (:documentation "Used to authenticate a subject communicating to the system. The provided authentication information is used to look up matching authentication instruments in the database.")
-
-  (:method ((subject subject))
-    (values #t nil subject)))
-
-(def (function e) login (authentication-information &rest authenticated-session-initargs
-                                                    &key (allow-parallel-sessions #t)
-                                                    on-successful-authentication-callback
-                                                    &allow-other-keys)
-  "When successful it returns a new authenticated-session instance holding the result."
-  (authentication.info "Logging in with authentication information ~A" authentication-information)
-  (mark-transaction-for-commit-only)
-  (remove-from-plistf authenticated-session-initargs :allow-parallel-sessions :on-successful-authentication-callback)
-  (bind (((:values authenticated-p authentication-instrument subject) (authenticate authentication-information)))
-    (flet ((fail (&optional reason)
-             (authentication.info "Login failed for authentication information ~A~:[.~;, reason: ~S.~]" authentication-information reason reason)
-             (when authentication-instrument
-               (bind ((failed-attempts (incf (number-of-failed-authentication-attempts-of authentication-instrument))))
-                 (when (> failed-attempts +failed-authentication-warning-limit+)
-                   (audit.warn "Failed authentication count is ~A of instrument ~A, subject ~A" failed-attempts authentication-instrument (subject-of authentication-instrument))))
-               ;; could disable the instrument or the (login-disabled-p subject) here
-               )
-             (return-from login nil)))
-      (if authenticated-p
-          (progn
-            (unless subject
-              (setf subject (subject-of authentication-instrument)))
-            (authentication.debug "Authenticated instrument ~A, subject ~A" authentication-instrument subject)
-            (when authentication-instrument
-              (when (disabled? authentication-instrument)
-                (fail "authenticated instrument is disabled"))
-              (setf (number-of-failed-authentication-attempts-of authentication-instrument) 0))
-            (when (login-disabled-p subject)
-              (fail "subject's login is disabled"))
-            (bind ((authenticated-session (apply #'make-instance
-                                                 'authenticated-session
-                                                 :effective-subject subject
-                                                 :authenticated-subject subject
-                                                 :authentication-instrument authentication-instrument
-                                                 :login-at (transaction-timestamp)
-                                                 authenticated-session-initargs))
-                   (parallel-sessions nil))
-              (login.info "Successful login by subject ~A using authentication-instument ~A into session ~A" subject authentication-instrument authenticated-session)
-              (unless allow-parallel-sessions
-                (setf parallel-sessions (select (session)
-                                          (from (session authenticated-session))
-                                          (where (and (eq (authenticated-subject-of session) subject)
-                                                      (null (logout-at-of session))))))
-                (iter (for parallel-session :in-sequence parallel-sessions)
-                      (unless (eq parallel-session authenticated-session)
-                        (authentication.info "Forcing logout of parallel session ~A, authenticated subject ~A" parallel-session (authenticated-subject-of parallel-session))
-                        (setf (logout-at-of parallel-session) (transaction-timestamp)))))
-              (when on-successful-authentication-callback
-                (funcall on-successful-authentication-callback authenticated-session))
-              (values authenticated-session parallel-sessions)))
-          (fail "authenticate failed")))))
-
+;; TODO move to wui and model
 (def (function e) logout (&key (status :logged-out) (logout-at (transaction-timestamp)))
   "The logout date is stored in the current authenticated session."
   (login.info "Logged out authenticated session ~A" *authenticated-session*)
@@ -252,6 +195,7 @@
         (setf (logout-at-of session) logout-at)
         (setf (status-of session) status)))
 
+;; TODO move to model
 (def (function e) impersonalize (new-effective-subject &key web-session-id)
   "Creates a new impersonalized authenticated-session and returns it."
   (authentication.info "Impersonalizing effective subject ~A by authenticated subject ~A"
@@ -275,6 +219,7 @@
                                          :remote-ip-address (remote-ip-address-of previous-authenticated-session))))
       (invalidate-cached-instance previous-authenticated-session))))
 
+;; TODO move to model
 (def (function e) cancel-impersonalization ()
   "Cancels the effect of a previous impersonalization and returns the parent session."
   (authentication.info "Cancelling impersonalization of effective subject ~A by authenticated subject ~A"
@@ -324,6 +269,7 @@
                                       :logout-at ,timestamp)
            ,@forms)))))
 
+;; TODO move to wui
 (def (function e) logged-in-p (&optional (authenticated-session (when (has-authenticated-session)
                                                                 *authenticated-session*)))
   (and authenticated-session
