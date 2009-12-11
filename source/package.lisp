@@ -28,6 +28,9 @@
   (:shadowing-import-from :iterate
                           #:finish)
 
+  (:shadowing-import-from :hu.dwim.def
+                          #:iterator)
+
   (:shadow #:login
            #:model
            #:element
