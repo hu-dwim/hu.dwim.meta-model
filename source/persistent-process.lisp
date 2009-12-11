@@ -273,7 +273,7 @@
   ;; TODO clean up and use a public api for error handling
   (when *debug-persistent-process*
     (restart-case
-     ;; TODO this is bullshit, we may not even be connected, see invoke-slime-debugger-if-possible
+     ;; FIXME we may not even be connected, see invoke-slime-debugger-if-possible
      (swank:swank-debugger-hook error nil)
      (continue ()
                :report "Record the error on the process instance and abort its execution."
@@ -297,6 +297,7 @@
                 (die-persistent-process process)))))))))
 
 (def with-macro with-persistent-process-error-handler ()
+  ;; TODO use util's with-layered-error-handler
   (handler-bind
       ((serious-condition 'handle-persistent-process-error))
     (-body-)))
