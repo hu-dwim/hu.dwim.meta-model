@@ -14,7 +14,7 @@
 (def special-variable *persistent-process-scheduler-keep-on-running* #f)
 
 (def special-variable *persistent-process-worker-group*
-  (make-instance 'worker-group :worker-name "persistent processor worker"))
+  (make-worker-group "persistent processor worker"))
 
 (def (function e) start-persistent-process-worker ()
   (bind ((compiled-query-cache (make-compiled-query-cache)))
