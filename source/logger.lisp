@@ -21,4 +21,4 @@
 ;; a separate branch for audit messages, only delegating to standard-logger.
 ;; later on, one can install a persistent appender to store audit messages in the database.
 (def (logger e) audit ())
-(def (logger e) login (audit))
+(def (logger :export :printers) login (audit))
