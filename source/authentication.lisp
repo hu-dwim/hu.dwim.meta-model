@@ -82,6 +82,18 @@
   ((:class authentication-instrument :slot authenticated-sessions :type (set authenticated-session))
    (:class authenticated-session :slot authentication-instrument :type (or null authentication-instrument))))
 
+(def (function e) current-authenticated-subject ()
+  (authenticated-subject-of *authenticated-session*))
+
+(def (function e) current-effective-subject ()
+  (effective-subject-of *authenticated-session*))
+
+(def function (setf current-effective-subject) (subject)
+  (authentication.debug "Changing effective subject of ~A to ~A" *authenticated-session* subject)
+  (mark-transaction-for-commit-only)
+  (setf (effective-subject-of *authenticated-session*) subject)
+  (invalidate-cached-instance *authenticated-session*))
+
 (def localization en
   (type-name.ip-address "IP address")
 
@@ -174,124 +186,6 @@
 
 ;;;;;;
 ;;; Authenticate
-
-;; TODO move to wui and model
-(def (function e) logout (&key (status :logged-out) (logout-at (transaction-timestamp)))
-  "The logout date is stored in the current authenticated session."
-  (login.info "Logged out authenticated session ~A" *authenticated-session*)
-  (mark-transaction-for-commit-only)
-  ;; these are not asserts because screwing up logout with signalled errors is a bad idea
-  (unless (login-at-of *authenticated-session*)
-    (authentication.error "There's some trouble with the authenticated session ~A at logout: login-at slot is NIL" *authenticated-session*))
-  (unless (authenticated-subject-of *authenticated-session*)
-    (authentication.error "There's some trouble with the authenticated session ~A at logout: authenticated-subject is NIL" *authenticated-session*))
-  (awhen (logout-at-of *authenticated-session*)
-    (authentication.error "There's some trouble with the authenticated session ~A at logout: logout-at slot is not NIL: ~A" *authenticated-session* it))
-  (iter (with authenticated-subject = (authenticated-subject-of *authenticated-session*))
-        (for session :first *authenticated-session* :then (parent-session-of session))
-        (while session)
-        (authentication.debug "Setting logout-at slot of authenticated session ~A" session)
-        (assert (eq (authenticated-subject-of session) authenticated-subject))
-        (setf (logout-at-of session) logout-at)
-        (setf (status-of session) status)))
-
-;; TODO move to model
-(def (function e) impersonalize (new-effective-subject &key web-session-id)
-  "Creates a new impersonalized authenticated-session and returns it."
-  (authentication.info "Impersonalizing effective subject ~A by authenticated subject ~A"
-                       new-effective-subject
-                       (authenticated-subject-of *authenticated-session*))
-  (mark-transaction-for-commit-only)
-  (assert (null (parent-session-of *authenticated-session*)))
-  (assert (or (null web-session-id)
-              (string= web-session-id (web-session-id-of *authenticated-session*))))
-  (bind ((previous-authenticated-session *authenticated-session*))
-    (prog1
-        (with-reloaded-instance previous-authenticated-session
-          (assert (null (logout-at-of previous-authenticated-session)))
-          (setf *authenticated-session* (make-authenticated-session
-                                         :web-session-id (web-session-id-of previous-authenticated-session)
-                                         :parent-session previous-authenticated-session
-                                         :login-at (transaction-timestamp)
-                                         :authenticated-subject (authenticated-subject-of previous-authenticated-session)
-                                         :effective-subject new-effective-subject
-                                         :authentication-instrument (authentication-instrument-of previous-authenticated-session)
-                                         :remote-ip-address (remote-ip-address-of previous-authenticated-session))))
-      (invalidate-cached-instance previous-authenticated-session))))
-
-;; TODO move to model
-(def (function e) cancel-impersonalization ()
-  "Cancels the effect of a previous impersonalization and returns the parent session."
-  (authentication.info "Cancelling impersonalization of effective subject ~A by authenticated subject ~A"
-                       (effective-subject-of *authenticated-session*)
-                       (authenticated-subject-of *authenticated-session*))
-  (mark-transaction-for-commit-only)
-  (bind ((previous-authenticated-session *authenticated-session*))
-    (prog1
-        (with-reloaded-instance previous-authenticated-session
-          (bind ((parent-session (parent-session-of *authenticated-session*)))
-            (assert parent-session)
-            (assert (null (logout-at-of previous-authenticated-session)))
-            (setf (logout-at-of previous-authenticated-session) (transaction-timestamp))
-            (setf *authenticated-session* parent-session)))
-      (invalidate-cached-instance previous-authenticated-session))))
-
-(def (macro e) with-login-and-logout (authentication-instrument &body forms)
-  ;; TODO only used by the (long dead) test code. delme?
-  (once-only (authentication-instrument)
-    (with-unique-names (authenticated-session)
-      `(with-transaction
-         (let ((,authenticated-session (login ,authentication-instrument)))
-           (unless ,authenticated-session
-             (error "Failed to login with ~A" ,authentication-instrument))
-           (with-revived-instance ,authenticated-session
-             (with-authenticated-session ,authenticated-session
-               (multiple-value-prog1
-                   (progn
-                     ,@forms)
-                 (logout)))))))))
-
-(def (macro e) with-authenticated-and-effective-subject (subject &body forms)
-  "Useful to unconditionally set a technical subject, for example when importing data. This inserts a new AUTHENTICATED-SESSION in the database, use accordingly..."
-  (once-only (subject)
-    (with-unique-names (in-transaction-p timestamp)
-      `(bind ((,in-transaction-p (hu.dwim.rdbms:in-transaction-p))
-              (,timestamp (if ,in-transaction-p
-                              (transaction-timestamp)
-                              (now))))
-         (assert ,subject)
-         (with-authenticated-session (make-authenticated-session
-                                      :persistent ,in-transaction-p
-                                      :effective-subject ,subject
-                                      :authenticated-subject ,subject
-                                      :login-at ,timestamp
-                                      ;; since this is going to run in a single transaction what else could we set?
-                                      :logout-at ,timestamp)
-           ,@forms)))))
-
-;; TODO move to wui
-(def (function e) logged-in-p (&optional (authenticated-session (when (has-authenticated-session)
-                                                                *authenticated-session*)))
-  (and authenticated-session
-       (and (authenticated-subject-of authenticated-session)
-            (effective-subject-of authenticated-session)
-            (null (logout-at-of authenticated-session)))))
-
-(def (function ei) current-authenticated-subject ()
-  (in-authenticated-session authenticated-session
-    ;; TODO there should be a (revive-instance authenticated-session). think of nested transactions...
-    (authenticated-subject-of authenticated-session)))
-
-(def (function ei) current-effective-subject ()
-  (in-authenticated-session authenticated-session
-    ;; TODO there should be a (revive-instance authenticated-session). think of nested transactions...
-    (effective-subject-of authenticated-session)))
-
-(def function (setf current-effective-subject) (subject)
-  (with-transaction
-    (authentication.debug "Changing effective subject of ~A to ~A" *authenticated-session* subject)
-    (setf (effective-subject-of *authenticated-session*) subject))
-  (invalidate-cached-instance *authenticated-session*))
 
 (def function select-authenticated-sessions-with-login-after-timestamp (timestamp)
   (select (authenticated-session)

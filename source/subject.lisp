@@ -10,7 +10,7 @@
 ;;; Model
 
 (def entity subject ()
-  ((login-disabled #f :type boolean))
+  ((login-disabled #f :type boolean :accessor login-disabled?))
   (:abstract #t)
   (:documentation "Az alany a rendszer által azonosítható dolog. Ez lehet természetes személy, valamilyen szervezet, technikai jellegű alany illetve egy másik szoftver komponens."))
 
