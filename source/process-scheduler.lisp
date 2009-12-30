@@ -40,7 +40,7 @@
                        (unwind-protect
                             (schedule-persistent-processes-continuously poll-time)
                          (setf *persistent-process-scheduler* nil)
-                         (condition-notify (scheduler-condition-variable-of *persistent-process-worker-group*))))
+                         (condition-notify (hu.dwim.util::scheduler-condition-variable-of *persistent-process-worker-group*))))
                      :name "persistent process scheduler")))
 
 (def (function e) is-persistent-process-scheduler-running? ()
@@ -49,7 +49,7 @@
 (def (function e) stop-persistent-process-scheduler ()
   (assert *persistent-process-scheduler*)
   (setf *persistent-process-scheduler-keep-on-running* #f)
-  (condition-notify (scheduler-condition-variable-of *persistent-process-worker-group*))
+  (condition-notify (hu.dwim.util::scheduler-condition-variable-of *persistent-process-worker-group*))
   *persistent-process-scheduler*)
 
 (def function schedule-persistent-processes-continuously (poll-time)
@@ -106,9 +106,9 @@
                 (progn
                   ;; process state and continuation must be reloaded
                   (invalidate-cached-instance process)
-                  (cond ((persistent-process-in-final-state-p process)
+                  (cond ((process-in-stop-state? process)
                          (scheduler.info "Another worker finished the persistent process ~A meanwhile" process))
-                        ((not (persistent-process-ready-to-run-p process))
+                        ((not (persistent-process-ready-to-run? process))
                          (scheduler.info "The persistent process ~A is not ready to run anymore" process))
                         (t (continue-persistent-process process))))
                 (scheduler.info "Skipping persistent process ~A because lock failed" process))))))))

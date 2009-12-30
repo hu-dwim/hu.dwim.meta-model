@@ -43,7 +43,7 @@
                              (:file "model" :depends-on ("model-element" "logger"))
                              (:file "model-element" :depends-on ("meta-model"))
                              (:file "package")
-                             (:file "persistent-process" :depends-on ("entity" "state-property" "authentication" "type" "finite-state-machine"))
+                             (:file "persistent-process" :depends-on ("entity" "state-property" "authentication" "type"))
                              (:file "process-dsl" :depends-on ("persistent-process"))
                              (:file "process-scheduler" :depends-on ("persistent-process" "subject"))
                              (:file "production" :depends-on ("model"))

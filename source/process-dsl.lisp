@@ -70,7 +70,7 @@
 ;;; Work with child processes
 
 (def (macro e) start-process (&body forms)
-  `(start-standard-persistent-process ',@forms))
+  `(start-persistent-process/form ',@forms))
 
 (def (macro e) with-parallel-child-processes (&body forms)
   "Starts several new child processes and waits until all of them terminates"
@@ -78,7 +78,7 @@
     `(bind ((,process *process*)
             (,child-processes
              (list ,@(iter (for form in forms)
-                           (collect `(start-standard-persistent-process
+                           (collect `(start-persistent-process/form
                                       ',form
                                       :start-running-in-same-transaction #t
                                       :parent-process ,process))))))
@@ -86,7 +86,7 @@
 
 (def (macro e) fork-child-process (&body forms)
   "Starts a new persistent process as a child of the current process"
-  `(start-standard-persistent-process
+  `(start-persistent-process/form
     '(progn
       ,@forms)
     :parent-process *process*
@@ -94,10 +94,10 @@
 
 (def function collect-in-progress-child-processes (parent-process &optional child-processes)
   ;; TODO: fix query compiler
-  (select-instances (process standard-persistent-process)
+  (select-instances (process persistent-process)
     (where (and (or (null child-processes)
                     (member process child-processes))
-                (not (persistent-process-in-final-state-p process))
+                (not (process-in-stop-state? process))
                 (eq parent-process (parent-process-of process))))))
 
 ;; TODO: function or macro? &rest or list argument?
@@ -170,7 +170,7 @@
   (process-wait (make-wait-for-timestamp :wait-until timestamp)))
 
 (def function/cc wait-for-milestone (process name &optional (count 1))
-  (process-wait (make-wait-for-milestone :standard-persistent-process process :milestone name :count count)))
+  (process-wait (make-wait-for-milestone :persistent-process process :milestone name :count count)))
 
 (def function/cc wait-for-activity (process name &optional (level 1))
-  (process-wait (make-wait-for-activity :standard-persistent-process process :activity name :level level)))
+  (process-wait (make-wait-for-activity :persistent-process process :activity name :level level)))
