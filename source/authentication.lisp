@@ -18,13 +18,13 @@
 (def persistent-type http-user-agent-name ()
   `(text ,+maximum-http-agent-identifier-length+))
 
-(def entity authentication-instrument ()
+(def (entity e) authentication-instrument ()
   ((number-of-failed-authentication-attempts 0 :type integer-16)
    (disabled #f :type boolean :accessor disabled?))
   (:abstract #t)
   (:documentation "Az azonosításhoz használható eszköz. Egy alany több és különféle ilyen eszközzel rendelkezhet."))
 
-(def entity authenticated-session ()
+(def (entity e) authenticated-session ()
   ((status
     :alive
     :type (member :alive :logged-out :expired :shutdown :crashed))

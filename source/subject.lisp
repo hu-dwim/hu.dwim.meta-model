@@ -9,12 +9,12 @@
 ;;;;;;
 ;;; Model
 
-(def entity subject ()
+(def (entity e) subject ()
   ((login-disabled #f :type boolean :accessor login-disabled?))
   (:abstract #t)
   (:documentation "Az alany a rendszer által azonosítható dolog. Ez lehet természetes személy, valamilyen szervezet, technikai jellegű alany illetve egy másik szoftver komponens."))
 
-(def entity technical-subject (subject)
+(def (entity e) technical-subject (subject)
   ((name
     :type standard-text
     :primary #t

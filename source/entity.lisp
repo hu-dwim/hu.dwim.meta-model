@@ -118,7 +118,7 @@
                  super-entities)
        (find-class ',class-name))))
 
-(def (definer e) entity (class-name super-entities slots &rest options)
+(def (definer e :available-flags "e") entity (class-name super-entities slots &rest options)
   `(defentity ,class-name ,super-entities ,slots ,@options))
 
 (def function owner-entity-of (property)

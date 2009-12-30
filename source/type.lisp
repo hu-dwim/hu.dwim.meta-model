@@ -73,7 +73,7 @@
   (type-name.serialized "serialized")
 
   (type-name.member "member type")
-  
+
   (type-name.boolean "boolean")
   (type-name.integer-16 "16 bits integer")
   (type-name.integer-32 "32 bits integer")
@@ -89,7 +89,7 @@
   (type-name.date "date")
   (type-name.time "time")
   (type-name.timestamp "timestamp")
-  
+
   (type-name.email-address "email address")
   (type-name.url-text "URL")
 
@@ -100,7 +100,7 @@
   (type-name.serialized "sorosított")
 
   (type-name.member "felsorolt típus")
-  
+
   (type-name.boolean "logikai érték")
   (type-name.integer-16 "16 bites egész szám")
   (type-name.integer-32 "32 bites egész szám")
@@ -116,7 +116,7 @@
   (type-name.date "dátum")
   (type-name.time "idő")
   (type-name.timestamp "időpont")
-  
+
   (type-name.email-address "email cím")
   (type-name.url-text "URL")
 
