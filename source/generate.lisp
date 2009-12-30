@@ -22,10 +22,7 @@
 ;;;;;;
 ;;; Top level
 
-(def (function e) generate-instances (&rest args &key
-                                 (entities (collect-entities))
-                                 (purge-instances #f)
-                                 &allow-other-keys)
+(def (function e) generate-instances (&rest args &key (entities (collect-entities)) (purge-instances #f) &allow-other-keys)
   "Generates instances according to the model. The number of generated instances and their properties and associations tries to fulfill the statistical requirements present in the model as much as possible."
   (when purge-instances
     (purge-instances 'persistent-object))
@@ -60,22 +57,22 @@
 
 (def generic generate-instance (entity)
   (:method ((entity-name symbol))
-           (generate-instance (find-entity entity-name)))
+    (generate-instance (find-entity entity-name)))
 
   (:method ((entity entity))
-           (if (abstract-p entity)
-               (aif (find-instanciable-subclass entity)
-                    (generate-instance it))
-               (bind ((instance (apply 'make-instance entity (collect-property-values entity))))
-                 (meta-model.debug "Generated ~a" instance)
-                 (generate-properties instance)
-                 (push instance *generated-instances*)
-                 (incf *generated-instance-count*)
-                 (incf (instance-count-for entity))
-                 instance)))
+    (if (abstract-p entity)
+        (aif (find-instanciable-subclass entity)
+             (generate-instance it))
+        (bind ((instance (apply 'make-instance entity (collect-property-values entity))))
+          (meta-model.debug "Generated ~a" instance)
+          (generate-properties instance)
+          (push instance *generated-instances*)
+          (incf *generated-instance-count*)
+          (incf (instance-count-for entity))
+          instance)))
 
-  (:method ((persistent-process persistent-process))
-           nil))
+  (:method ((persistent-process-class persistent-process-class))
+    nil))
 
 ;;;;;;
 ;;; Properties
@@ -101,14 +98,14 @@
 
 (def generic generate-property (property)
   (:method ((property effective-property))
-           (cond
-             ((string= (slot-definition-name property) "NAME")
-              (generate-name (symbol-name (element-name-of (owner-entity-of property)))))
-             (t (random-value (property-type-of property)))))
+    (cond
+      ((string= (slot-definition-name property) "NAME")
+       (generate-name (symbol-name (element-name-of (owner-entity-of property)))))
+      (t (random-value (property-type-of property)))))
 
   (:method ((property effective-state-property))
-           (bind ((states (states-of (state-machine-of property))))
-             (element-name-of (random-element states)))))
+    (bind ((states (hu.dwim.util::states-of (state-machine-of property))))
+      (element-name-of (random-element states)))))
 
 ;;;;;;
 ;;; Associations
@@ -121,31 +118,31 @@
 
 (def generic link-instance-with-associated-instances (instance association-end)
   (:method :around (instance association-end)
-           (with-simple-restart (continue "Skip LINK-INSTANCE-WITH-ASSOCIATED-INSTANCES for instance ~A association ~A"
-                                          instance association-end)
-             (call-next-method)))
+    (with-simple-restart (continue "Skip LINK-INSTANCE-WITH-ASSOCIATED-INSTANCES for instance ~A association ~A"
+                                   instance association-end)
+      (call-next-method)))
 
   (:method ((instance persistent-object) (association-end association-end))
-           (not-yet-implemented))
+    (not-yet-implemented))
 
   (:method ((instance persistent-object) (association-end binary-association-end))
-           (bind ((min-cardinality (min-number-of-associated-instances association-end))
-                  (max-cardinality (max-number-of-associated-instances association-end))
-                  (required-cardinality (if (to-many-association-end-p association-end)
-                                            (floor
-                                             (+ min-cardinality
-                                                (* (random* (1+ (- max-cardinality min-cardinality)))
-                                                   (expt 0.9 (instance-count-for (entity-of instance))))))
-                                            (random-integer min-cardinality max-cardinality)))
-                  (current-cardinality (current-cardinality instance association-end)))
-             (when (< current-cardinality required-cardinality)
-               (meta-model.debug "Required cardinality at ~A ~A is ~A" instance association-end required-cardinality)
-               (bind ((instances (collect-or-create-free-instances
-                                  (- required-cardinality current-cardinality)
-                                  (hu.dwim.perec::other-effective-association-end-for (hu.dwim.perec::associated-class-of association-end) association-end))))
-                 (if (to-many-association-end-p association-end)
-                     (insert-list (with-lazy-slot-value-collections (slot-value instance (slot-definition-name association-end))) instances)
-                     (setf (slot-value instance (slot-definition-name association-end)) (first instances))))))))
+    (bind ((min-cardinality (min-number-of-associated-instances association-end))
+           (max-cardinality (max-number-of-associated-instances association-end))
+           (required-cardinality (if (to-many-association-end-p association-end)
+                                     (floor
+                                      (+ min-cardinality
+                                         (* (random* (1+ (- max-cardinality min-cardinality)))
+                                            (expt 0.9 (instance-count-for (entity-of instance))))))
+                                     (random-integer min-cardinality max-cardinality)))
+           (current-cardinality (current-cardinality instance association-end)))
+      (when (< current-cardinality required-cardinality)
+        (meta-model.debug "Required cardinality at ~A ~A is ~A" instance association-end required-cardinality)
+        (bind ((instances (collect-or-create-free-instances
+                           (- required-cardinality current-cardinality)
+                           (hu.dwim.perec::other-effective-association-end-for (hu.dwim.perec::associated-class-of association-end) association-end))))
+          (if (to-many-association-end-p association-end)
+              (insert-list (with-lazy-slot-value-collections (slot-value instance (slot-definition-name association-end))) instances)
+              (setf (slot-value instance (slot-definition-name association-end)) (first instances))))))))
 
 (def function max-cardinality-for (association-end)
   (or (get-statistics-param association-end :max)
@@ -267,54 +264,54 @@
   ;; TODO: perec
   #+nil
   (:method ((type symbol-type) &key &allow-other-keys)
-           (random-symbol))
+    (random-symbol))
   
   (:method ((type integer-type) &key (min 0) (max 1000) &allow-other-keys)
-           (random-integer min max))
+    (random-integer min max))
 
   (:method ((type (eql (find-type 'float-32))) &key min max &allow-other-keys)
-           (random-number (or min most-negative-single-float) (or max most-positive-single-float)))
+    (random-number (or min most-negative-single-float) (or max most-positive-single-float)))
 
   (:method ((type (eql (find-type 'float-64))) &key min max &allow-other-keys)
-           (random-number (or min most-negative-double-float) (or max most-positive-double-float)))
+    (random-number (or min most-negative-double-float) (or max most-positive-double-float)))
   
   (:method ((type member-type) &key &allow-other-keys)
-           (if (eq type (find-type 'boolean))
-               (random-boolean)
-               (random-element (members-of type))))
+    (if (eq type (find-type 'boolean))
+        (random-boolean)
+        (random-element (members-of type))))
 
   (:method ((type string-type) &key (length 10) &allow-other-keys)
-           (random-string length "abcdefghijklmnopqrstuvwxyz "))
+    (random-string length "abcdefghijklmnopqrstuvwxyz "))
 
   (:method ((type form-type) &key &allow-other-keys)
-           (list "form"))
+    (list "form"))
 
   (:method ((type serialized-type) &key &allow-other-keys)
-           (random-value (find-type t)))
+    (random-value (find-type t)))
 
   (:method ((type (eql (find-type 'serialized))) &key &allow-other-keys)
-           (random-value (find-type t)))
+    (random-value (find-type t)))
 
   (:method ((type (eql (find-type t))) &key &allow-other-keys)
-           (case (random* 3)
-             (0 (random-integer -100 100))
-             (1 (random-number -100.0 100.0))
-             (2 (random-string 10 "abcdefghijklmnopqrstuvwxyz "))))
+    (case (random* 3)
+      (0 (random-integer -100 100))
+      (1 (random-number -100.0 100.0))
+      (2 (random-string 10 "abcdefghijklmnopqrstuvwxyz "))))
 
   (:method ((type text-type) &key (length 10) &allow-other-keys)
-           (random-string length "abcdefghijklmnopqrstuvwxyz "))
+    (random-string length "abcdefghijklmnopqrstuvwxyz "))
 
   (:method ((type (eql (find-type 'percentage))) &key &allow-other-keys)
-           (random-number 0.0 1.0))
+    (random-number 0.0 1.0))
 
   (:method ((type (eql (find-type 'date))) &key &allow-other-keys)
-           (random-date))
+    (random-date))
   
   (:method ((type (eql (find-type 'timestamp))) &key &allow-other-keys)
-           (random-timestamp))
+    (random-timestamp))
 
   (:method ((type persistent-class) &key &allow-other-keys)
-           (random-instance type)))
+    (random-instance type)))
 
 ;;;;;;
 ;;; Random generators
@@ -361,8 +358,8 @@
 (def function random-instance (class)
   (bind ((query (make-query
                  `(select (:result-type scroll) (instance)
-                   (from instance)
-                   (where (typep instance ,class)))))
+                    (from instance)
+                    (where (typep instance ,class)))))
          (scroll (execute-query query)))
     (setf (page-size scroll) 1)
     (bind ((count (element-count scroll)))
