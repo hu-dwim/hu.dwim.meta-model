@@ -52,6 +52,7 @@
 
 (define-model-class operation-restricted-authorization (authorization)
   ((operation
+    nil
     :type operation
     :documentation "The operation on which this authorization rule must be applied."))
   (:abstract #t))
@@ -108,12 +109,9 @@
          (object (getf options :object))
          (effective-subject (getf options :effective-subject))
          (authorization-definer
-          (cond ((getf options :effective-subject)
-                 'define-restricted-authorization)
-                ((getf options :operation)
-                 'define-operation-restricted-authorization)
-                (t
-                 'define-authorization))))
+          (if options
+              'define-restricted-authorization
+              'define-authorization)))
     `(,authorization-definer ,(if name
                                   `',name
                                   (authorization-name-for operation effective-subject 'anything))
