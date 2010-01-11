@@ -44,8 +44,6 @@
       (setf (database-of self) database))
     database))
 
-(def (special-variable e) *default-plural-generator* 'english-plural-symbol-for)
-
 ;;;;;;
 ;;; Generic model functions
 

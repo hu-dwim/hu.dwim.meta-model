@@ -76,9 +76,6 @@
 
 (def definer association (&body association-ends)
   (bind ((options (cdr association-ends))
-         (plural-generator (aif (find :plural-generator options :key 'first)
-                                (second it)
-                                *default-plural-generator*))
          (primary-association-end (first (first association-ends)))
          (secondary-association-end (second (first association-ends)))
          (metaclass (or (second (find :metaclass options :key 'first))
@@ -91,7 +88,7 @@
                    type))
              (slot-for-type (type)
                (if (consp type)
-                   (funcall plural-generator (second type))
+                   (second type)
                    type))
              ;; KLUDGE: perec normalize-type-for cannot be used because it relies on the classes being already defined
              (normalized-type-for (type)
@@ -113,7 +110,7 @@
                     (list :slot (slot-for-type type)))
                   association-end))))
       `(progn
-         (def persistent-association*
+         (def (persistent-association* ,@-options-)
            (,(process-association-end primary-association-end secondary-association-end)
              ,(process-association-end secondary-association-end primary-association-end))
            ,@options

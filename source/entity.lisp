@@ -54,13 +54,7 @@
 ;;; Defining entities
 
 (def (macro e) defentity (class-name super-entities slots &rest options)
-  (bind ((plural-generator (aif (find :plural-generator options :key 'first)
-                                (second it)
-                                *default-plural-generator*))
-         (maker-name (format-symbol *package* "MAKE-~A" class-name))
-         (single-selector-name (format-symbol *package* "SELECT-~A" class-name))
-         (multi-selector-name (funcall plural-generator single-selector-name))
-         (metaclass (or (second (find :metaclass options :key 'first))
+  (bind ((metaclass (or (second (find :metaclass options :key 'first))
                         (if (find :dimensions slots :test #'member)
                             'entity-d
                             'entity)))
@@ -72,43 +66,30 @@
                                       (when (getf slot-options :compute-as)
                                         (clearf (getf slot-options :dimensions)))
                                       slot))
-                                  slots))
-         (slot-names (mapcar 'first slots)))
+                                  slots)))
     `(progn
-       (def macro ,maker-name (&rest args &key ,@slot-names &allow-other-keys)
-         (declare (ignore ,@slot-names))
-         `(make-instance ',',class-name ,@args))
-       (export ',maker-name)
-       (def macro ,single-selector-name (&rest args &key ,@slot-names &allow-other-keys)
-         (declare (ignore ,@slot-names))
-         `(select-similar-instance ,',class-name ,@args))
-       (export ',single-selector-name)
-       (def macro ,multi-selector-name (&rest args &key ,@slot-names &allow-other-keys)
-         (declare (ignore ,@slot-names))
-         `(select-similar-instances ,',class-name ,@args))
-       (export ',multi-selector-name)
        (def persistent-class* ,class-name ,super-entities ,processed-slots
-            ,@`((:metaclass ,metaclass)
-                (:export-class-name-p #t)
-                (:export-accessor-names-p #t)
-                (:slot-definition-transformer
-                 (lambda (slot-definition)
-                   ,(awhen (second (find :slot-definition-transformer options :key 'first))
-                           `(setf slot-definition (funcall ,it slot-definition)))
-                   (bind ((slot-name (car slot-definition))
-                          (slot-options (cdr slot-definition)))
-                     (list* slot-name
-                            (aif (getf slot-options :compute-as)
-                                 (append (remove-from-plist slot-options :compute-as)
-                                         `(:initform
-                                           (compute-as-in-transaction* (:universe (computed-universe-of *transaction*)) ,it)
-                                           :persistent #f
-                                           :editable #f)
-                                         (if (eq (and (consp it)
-                                                      (first it)) 'select)
-                                             `(:property-query (prog1-bind query (make-query ',it)
-                                                                 (add-lexical-variable query '-self-)))))
-                                 slot-options))))))
+         ,@`((:metaclass ,metaclass)
+             (:export-class-name-p #t)
+             (:export-accessor-names-p #t)
+             (:slot-definition-transformer
+              (lambda (slot-definition)
+                ,(awhen (second (find :slot-definition-transformer options :key 'first))
+                        `(setf slot-definition (funcall ,it slot-definition)))
+                (bind ((slot-name (car slot-definition))
+                       (slot-options (cdr slot-definition)))
+                  (list* slot-name
+                         (aif (getf slot-options :compute-as)
+                              (append (remove-from-plist slot-options :compute-as)
+                                      `(:initform
+                                        (compute-as-in-transaction* (:universe (computed-universe-of *transaction*)) ,it)
+                                        :persistent #f
+                                        :editable #f)
+                                      (if (eq (and (consp it)
+                                                   (first it)) 'select)
+                                          `(:property-query (prog1-bind query (make-query ',it)
+                                                              (add-lexical-variable query '-self-)))))
+                              slot-options))))))
             ,@processed-options)
        (unless (find-entity ',class-name :ignore-missing #t)
          (add-model-element (find-class ',class-name)))
@@ -119,7 +100,50 @@
        (find-class ',class-name))))
 
 (def (definer e :available-flags "e") entity (class-name super-entities slots &rest options)
-  `(defentity ,class-name ,super-entities ,slots ,@options))
+  (bind ((metaclass (or (second (find :metaclass options :key 'first))
+                        (if (find :dimensions slots :test #'member)
+                            'entity-d
+                            'entity)))
+         (processed-options (remove-if [member (first !1) '(:metaclass :slot-definition-transformer)] options))
+         (processed-slots (mapcar (lambda (slot)
+                                    (bind ((slot-options (if (oddp (length slot))
+                                                             (cdr slot)
+                                                             (cddr slot))))
+                                      (when (getf slot-options :compute-as)
+                                        (clearf (getf slot-options :dimensions)))
+                                      slot))
+                                  slots)))
+    `(progn
+       (def (persistent-class* ,@-options-) ,class-name ,super-entities ,processed-slots
+         ,@`((:metaclass ,metaclass)
+             (:export-class-name-p #t)
+             (:export-accessor-names-p #t)
+             (:slot-definition-transformer
+              (lambda (slot-definition)
+                ,(awhen (second (find :slot-definition-transformer options :key 'first))
+                        `(setf slot-definition (funcall ,it slot-definition)))
+                (bind ((slot-name (car slot-definition))
+                       (slot-options (cdr slot-definition)))
+                  (list* slot-name
+                         (aif (getf slot-options :compute-as)
+                              (append (remove-from-plist slot-options :compute-as)
+                                      `(:initform
+                                        (compute-as-in-transaction* (:universe (computed-universe-of *transaction*)) ,it)
+                                        :persistent #f
+                                        :editable #f)
+                                      (if (eq (and (consp it)
+                                                   (first it)) 'select)
+                                          `(:property-query (prog1-bind query (make-query ',it)
+                                                              (add-lexical-variable query '-self-)))))
+                              slot-options))))))
+            ,@processed-options)
+       (unless (find-entity ',class-name :ignore-missing #t)
+         (add-model-element (find-class ',class-name)))
+       ,@(mapcar (lambda (super-entity)
+                   `(when (find-entity ',super-entity :ignore-missing #t)
+                      (define-simple-generalization ',class-name ',super-entity)))
+                 super-entities)
+       (find-class ',class-name))))
 
 (def function owner-entity-of (property)
   "Returns the exclusive owner as an entity of the given property."
