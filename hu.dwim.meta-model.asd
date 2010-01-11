@@ -22,7 +22,8 @@
                :hu.dwim.perec.postgresql
                :hu.dwim.perec+iolib
                :hu.dwim.syntax-sugar
-               :hu.dwim.util.all
+               :hu.dwim.util.production+swank
+               :hu.dwim.util.worker-group
                :hu.dwim.walker
                :hu.dwim.wui
                :iolib.sockets
