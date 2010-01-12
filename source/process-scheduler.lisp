@@ -56,7 +56,7 @@
   (with-model-database
     (with-new-compiled-query-cache
       (with-authenticated-session (with-transaction
-                                    (login *scheduler-technical-subject*))
+                                    (login/subject *scheduler-technical-subject* nil))
         (scheduler.info "Process scheduler starts up")
         ;; TODO it will only check for *persistent-process-scheduler-keep-on-running* based on poll-time
         ;; and due to this stopping the process is slow.
@@ -72,7 +72,7 @@
               (wait-until-all-jobs-are-finished *persistent-process-worker-group*))
         (scheduler.info "Process scheduler exits")
         (with-transaction
-          (logout))))))
+          (logout/authenticated-session))))))
 
 (def (function e) schedule-persistent-processes ()
   (iter (while (schedule-a-bunch-of-persistent-processes))))

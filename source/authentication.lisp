@@ -187,6 +187,114 @@
 ;;;;;;
 ;;; Authenticate
 
+(def (function e) login/subject (subject authentication-instrument)
+  (prog1-bind authenticated-session (make-instance 'authenticated-session
+                                                   :effective-subject subject
+                                                   :authenticated-subject subject
+                                                   :authentication-instrument authentication-instrument
+                                                   :login-at (transaction-timestamp))
+    (login.info "Successful login by subject ~A using authentication-instument ~A into session ~A" subject authentication-instrument authenticated-session)))
+
+(def (function e) login/authenticated-session (authentication-instrument &key (allow-parallel-sessions #f))
+  (check-type authentication-instrument authentication-instrument)
+  (bind ((subject (subject-of authentication-instrument)))
+    (authentication.debug "LOGIN/AUTHENTICATED-SESSION of subject ~A, authentication-instrument ~A" subject authentication-instrument)
+    (assert (in-transaction-p))
+    (mark-transaction-for-commit-only)
+    (flet ((fail (reason)
+             (return-from login/authenticated-session (values nil reason))))
+      (when (disabled? authentication-instrument)
+        (fail "authentication instrument is disabled"))
+      (setf (number-of-failed-authentication-attempts-of authentication-instrument) 0)
+      (when (login-disabled? subject)
+        (fail "subject's login is disabled"))
+      (bind ((authenticated-session (login/subject subject authentication-instrument)))
+        (unless allow-parallel-sessions
+          (bind ((parallel-sessions (select (session)
+                                      (from (session authenticated-session))
+                                      (where (and (eq (authenticated-subject-of session) subject)
+                                                  (null (logout-at-of session)))))))
+            ;; TODO invalidate web sessions of the parallel authenticated sessions?
+            (iter (for parallel-session :in-sequence parallel-sessions)
+                  (unless (eq parallel-session authenticated-session)
+                    (authentication.info "Forcing logout of parallel session ~A, authenticated subject ~A" parallel-session (authenticated-subject-of parallel-session))
+                    (setf (logout-at-of parallel-session) (transaction-timestamp))))))
+        authenticated-session))))
+
+(def (function e) logout/authenticated-session (&key (status :logged-out) (logout-at (transaction-timestamp)))
+  (login.info "Logging out authenticated session ~A" *authenticated-session*)
+  (check-type status (member :logged-out :expired :shutdown :crashed))
+  (mark-transaction-for-commit-only)
+  ;; these are not asserts because screwing up logout with signalled errors is a bad idea
+  (unless (login-at-of *authenticated-session*)
+    (authentication.error "There's some trouble with the authenticated session ~A at logout: login-at slot is NIL" *authenticated-session*))
+  (unless (authenticated-subject-of *authenticated-session*)
+    (authentication.error "There's some trouble with the authenticated session ~A at logout: authenticated-subject is NIL" *authenticated-session*))
+  (awhen (logout-at-of *authenticated-session*)
+    (authentication.error "There's some trouble with the authenticated session ~A at logout: logout-at slot is not NIL: ~A" *authenticated-session* it))
+  (iter (with authenticated-subject = (authenticated-subject-of *authenticated-session*))
+        (for session :first *authenticated-session* :then (parent-session-of session))
+        (while session)
+        (authentication.debug "Setting logout-at slot of authenticated session ~A" session)
+        (assert (eq (authenticated-subject-of session) authenticated-subject))
+        (setf (logout-at-of session) logout-at)
+        (setf (status-of session) status)))
+
+(def (function e) valid-authenticated-session? (&optional (authenticated-session (when (has-authenticated-session)
+                                                                                 *authenticated-session*)))
+  (and authenticated-session
+       (null (logout-at-of authenticated-session))))
+
+(def (function e) impersonalize/authenticated-session (new-effective-subject)
+  (authentication.info "Impersonalizing effective subject ~A by authenticated subject ~A" new-effective-subject (authenticated-subject-of *authenticated-session*))
+  (mark-transaction-for-commit-only)
+  (assert (null (parent-session-of *authenticated-session*)))
+  (bind ((previous-authenticated-session *authenticated-session*))
+    (prog1
+        (with-reloaded-instance previous-authenticated-session
+          (assert (null (logout-at-of previous-authenticated-session)))
+          (setf *authenticated-session* (make-instance 'authenticated-session
+                                                       ;; TODO :web-session-id (web-session-id-of previous-authenticated-session)
+                                                       :parent-session previous-authenticated-session
+                                                       :login-at (transaction-timestamp)
+                                                       :authenticated-subject (authenticated-subject-of previous-authenticated-session)
+                                                       :effective-subject new-effective-subject
+                                                       :authentication-instrument (authentication-instrument-of previous-authenticated-session)
+                                                       :remote-ip-address (remote-ip-address-of previous-authenticated-session))))
+      (invalidate-cached-instance previous-authenticated-session))))
+
+(def (function e) cancel-impersonalization/authenticated-session ()
+  "Cancels the effect of a previous impersonalization and returns the parent session."
+  (authentication.info "Cancelling impersonalization of effective subject ~A by authenticated subject ~A" (effective-subject-of *authenticated-session*) (authenticated-subject-of *authenticated-session*))
+  (mark-transaction-for-commit-only)
+  (bind ((previous-authenticated-session *authenticated-session*))
+    (prog1
+        (with-reloaded-instance previous-authenticated-session
+          (bind ((parent-session (parent-session-of *authenticated-session*)))
+            (assert parent-session)
+            (assert (null (logout-at-of previous-authenticated-session)))
+            (setf (logout-at-of previous-authenticated-session) (transaction-timestamp))
+            (setf *authenticated-session* parent-session)))
+      (invalidate-cached-instance previous-authenticated-session))))
+
+(def (macro e) with-authenticated-and-effective-subject (subject &body forms)
+  "Useful to unconditionally set a technical subject, for example when importing data. This inserts a new AUTHENTICATED-SESSION in the database, use accordingly..."
+  (once-only (subject)
+    (with-unique-names (in-transaction? timestamp)
+      `(bind ((,in-transaction? (hu.dwim.rdbms:in-transaction-p))
+              (,timestamp (if ,in-transaction?
+                              (transaction-timestamp)
+                              (now))))
+         (assert ,subject)
+         (with-authenticated-session (make-instance 'authenticated-session
+                                                    :persistent ,in-transaction?
+                                                    :effective-subject ,subject
+                                                    :authenticated-subject ,subject
+                                                    :login-at ,timestamp
+                                                    ;; since this is going to run in a single transaction what else could we set?
+                                                    :logout-at ,timestamp)
+           ,@forms)))))
+
 (def function select-authenticated-sessions-with-login-after-timestamp (timestamp)
   (select (authenticated-session)
     (from (authenticated-session authenticated-session))
