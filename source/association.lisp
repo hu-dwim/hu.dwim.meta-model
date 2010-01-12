@@ -86,10 +86,6 @@
                (if (consp type)
                    (second type)
                    type))
-             (slot-for-type (type)
-               (if (consp type)
-                   (second type)
-                   type))
              ;; KLUDGE: perec normalize-type-for cannot be used because it relies on the classes being already defined
              (normalized-type-for (type)
                (cond ((and (listp type)
@@ -106,8 +102,6 @@
                  (append
                   (unless class
                     (list :class (class-for-type other-type)))
-                  (unless slot
-                    (list :slot (slot-for-type type)))
                   association-end))))
       `(progn
          (def (persistent-association* ,@-options-)
