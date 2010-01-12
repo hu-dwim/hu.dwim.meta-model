@@ -96,8 +96,6 @@
                      (t type)))
              (process-association-end (association-end other-association-end)
                (bind ((class (getf association-end :class))
-                      (slot (getf association-end :slot))
-                      (type (normalized-type-for (getf association-end :type)))
                       (other-type (normalized-type-for (getf other-association-end :type))))
                  (append
                   (unless class
