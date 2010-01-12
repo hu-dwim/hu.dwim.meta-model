@@ -28,8 +28,8 @@
              (bind ((variable-name (symbolicate '#:* (string-upcase name) '#:-technical-subject*)))
                `(progn
                   (def (singleton-persistent-instance e) ,variable-name
-                      (or (select-technical-subject :name ,name)
-                          (make-technical-subject :name ,name)))
+                      (or (select-similar-instance technical-subject :name ,name)
+                          (make-instance 'technical-subject :name ,name)))
                   (def (macro e) ,(symbolicate '#:with- (string-upcase name) '#:-technical-subject) (&body forms)
                     (with-unique-names (subject)
                       `(bind ((,subject (if (hu.dwim.rdbms:in-transaction-p)

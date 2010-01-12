@@ -377,7 +377,7 @@
 (def (function e) send-message (message process)
   (unless (message-queue-of process)
     (setf (message-queue-of process)
-          (make-message-queue)))
+          (make-instance 'message-queue)))
   (insert-item (persistent-messages-of* (message-queue-of process)) message))
 
 (def (function/cc e) receive-message (process &optional (message-class-name 'persistent-message))
