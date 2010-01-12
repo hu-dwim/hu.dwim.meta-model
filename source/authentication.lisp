@@ -63,24 +63,24 @@
   :default-coordinate (current-authenticated-session))
 
 (def association
-  ((:class authenticated-session :slot impersolalized-sessions :type (set authenticated-session))
-   (:class authenticated-session :slot parent-session :type (or null authenticated-session))))
+  ((:slot impersolalized-sessions :type (set authenticated-session))
+   (:slot parent-session :type (or null authenticated-session))))
 
 (def association
-  ((:class subject :slot authenticated-sessions :type (set authenticated-session))
-   (:class authenticated-session :slot authenticated-subject :type (or null subject) :primary #t)))
+  ((:slot authenticated-sessions :type (set authenticated-session))
+   (:slot authenticated-subject :type (or null subject) :primary #t)))
 
 (def association
-  ((:class subject :slot effective-sessions :type (set authenticated-session))
-   (:class authenticated-session :slot effective-subject :type (or null subject) :primary #t)))
+  ((:slot effective-sessions :type (set authenticated-session))
+   (:slot effective-subject :type (or null subject) :primary #t)))
 
 (def association
-  ((:class subject :slot authentication-instruments :type (set authentication-instrument))
-   (:class authentication-instrument :slot subject :type subject :primary #t)))
+  ((:slot authentication-instruments :type (set authentication-instrument))
+   (:slot subject :type subject :primary #t)))
 
 (def association
-  ((:class authentication-instrument :slot authenticated-sessions :type (set authenticated-session))
-   (:class authenticated-session :slot authentication-instrument :type (or null authentication-instrument))))
+  ((:slot authenticated-sessions :type (set authenticated-session))
+   (:slot authentication-instrument :type (or null authentication-instrument))))
 
 (def (function e) current-authenticated-subject ()
   (authenticated-subject-of *authenticated-session*))

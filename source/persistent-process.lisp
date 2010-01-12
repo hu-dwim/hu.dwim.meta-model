@@ -154,12 +154,12 @@
   ())
 
 (def association
-  ((:type (or null message-queue))
-   (:type (or null persistent-process))))
+  ((:slot message-queue :type (or null message-queue))
+   (:slot persistent-process :type (or null persistent-process))))
 
 (def association
-  ((:type (set persistent-message))
-   (:type (or null message-queue))))
+  ((:slot persistent-messages :type (set persistent-message))
+   (:slot message-queue :type (or null message-queue))))
 
 ;;;;;;
 ;;; Wait reasons
@@ -169,8 +169,8 @@
   (:abstract #t))
 
 (def association
-  ((:type (or null wait-reason))
-   (:type (set persistent-process))))
+  ((:slot wait-reason :type (or null wait-reason))
+   (:slot persistent-processes :type (set persistent-process))))
 
 (def (entity e) wait-for-expression (wait-reason)
   ((wait-for-subject :type boolean)
@@ -180,8 +180,8 @@
   ())
 
 (def association
-  ((:type (set wait-for-subject))
-   (:type subject :primary #t :reference #t)))
+  ((:slot subject :type subject :primary #t :reference #t)
+   (:slot wait-for-subjects :type (set wait-for-subject))))
 
 (def (entity e) wait-for-subject-type (wait-reason)
   ((class-name :type symbol :primary #t :reference #t)))
@@ -197,8 +197,8 @@
    (count :type integer-32)))
 
 (def association
-  ((:type persistent-process)
-   (:type (set wait-for-milestone))))
+  ((:slot persistent-process :type persistent-process)
+   (:slot wait-for-milestones :type (set wait-for-milestone))))
 
 (def persistent-type activity ()
   'integer-32)
@@ -208,8 +208,8 @@
    (level :type integer-32)))
 
 (def association
-  ((:type persistent-process)
-   (:type (set wait-for-activity))))
+  ((:slot persistent-process :type persistent-process)
+   (:slot wait-for-activities :type (set wait-for-activity))))
 
 (def (entity e) wait-for-message (wait-reason)
   ((message-class-name :type symbol)))
