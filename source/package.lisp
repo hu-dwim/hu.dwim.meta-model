@@ -42,11 +42,13 @@
   (:import-from :hu.dwim.perec
                 #:compute-as)
 
-  (:export #:-instance-
+  (:export #:-operation-
+           #:-instance-
            #:-entity-
            #:-property-
            #:-authenticated-subject-
            #:-effective-subject-
+           #:-format-
            #:top-level-authorization)
 
   (:readtable-setup
