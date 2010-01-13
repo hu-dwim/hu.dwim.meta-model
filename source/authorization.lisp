@@ -252,8 +252,7 @@
     (or *disable-authorization* (apply #'authorize-operation (find-operation operation) args)))
 
   (:method (operation &rest args &key &allow-other-keys)
-    (in-authenticated-session (authenticated-subject effective-subject)
-      (apply #'authorize-operation-for-subject operation authenticated-subject effective-subject args))))
+    (apply #'authorize-operation-for-subject operation (current-authenticated-subject) (current-effective-subject) args)))
 
 (def generic authorize-operation-for-subject (operation authenticated-subject effective-subject &rest args &key &allow-other-keys)
   (:documentation "Returns true or false indicating that the authorization failed or not.")
@@ -295,17 +294,16 @@
   (:method (operation query)
     (authorization.dribble "Authorizing operation ~A on query ~A" operation query)
     (unless *disable-authorization*
-      (in-authenticated-session (authenticated-subject effective-subject) ;; TODO: add special variables to query instead
-        (if-bind top-level-authorization (find-authorization 'top-level-authorization)
-          (iter (for variable-name in (hu.dwim.perec::get-query-variable-names query))
-                (authorization.debug "Adding assert for variable name ~A" variable-name)
-                (add-assert query `(,(condition-function-name-for-authorization top-level-authorization)
-                                     ,operation
-                                     ,authenticated-subject
-                                     ,effective-subject
-                                     :-entity- (entity-of ,variable-name)
-                                     :-instance- ,variable-name)))
-          (cerror "No top level authorization rule found!" 'authorization-error))))
+      (if-bind top-level-authorization (find-authorization 'top-level-authorization)
+        (iter (for variable-name in (hu.dwim.perec::get-query-variable-names query))
+              (authorization.debug "Adding assert for variable name ~A" variable-name)
+              (add-assert query `(,(condition-function-name-for-authorization top-level-authorization)
+                                   ,operation
+                                   ,(current-authenticated-subject)
+                                   ,(current-effective-subject)
+                                   :-entity- (entity-of ,variable-name)
+                                   :-instance- ,variable-name)))
+        (cerror "No top level authorization rule found!" 'authorization-error)))
     query))
 
 (def (function e) execute-authorized-query (query &rest lexical-variable-values)
