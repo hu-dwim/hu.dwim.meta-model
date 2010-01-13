@@ -43,6 +43,7 @@
            #+nil
            (hu.dwim.model:is-cluster-node-running?))))
 
+;; TODO: move to logger
 (def function setup-loggers-for-production (project-system-name)
   (setf *log-directory* (format nil "/var/log/~A/" (string-downcase project-system-name)))
   (unless (ignore-errors
