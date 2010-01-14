@@ -22,6 +22,10 @@
      :type integer
      :initial-value 4005
      :documentation "The port is used to connect to the running server with SLIME.")
+    (("disable-debugger" #\Space)
+     :type boolean
+     :optional #t
+     :documentation "Disable the debugger, so that in case of unhandled toplevel errors the process quits. True by default unless in --repl mode.")
     (("repl" #\Space)
      :type boolean
      :optional #t
@@ -66,7 +70,8 @@
     (ensure-utf-8-external-format)
     ;; TODO: factor out the database arguments into rdbms
     (bind (((&key database-host database-port database-name database-user-name database-password
-                  cluster-name pid-file swank-port repl test-mode verbose (export-model #t) &allow-other-keys) command-line-arguments)
+                  cluster-name pid-file swank-port repl test-mode verbose (export-model #t) (disable-debugger #t disable-debugger-provided?)
+                  &allow-other-keys) command-line-arguments)
            (connection-specification `(:host ,database-host :port ,database-port :database ,database-name :user-name ,database-user-name :password ,database-password))
            (loggable-connection-specification (remove-from-plist connection-specification :password))
            (cluster-name (or cluster-name
@@ -103,9 +108,15 @@
       (awhen (load-and-eval-config-file project-system-name)
         (meta-model.info "Loaded config file ~A" it))
       (if repl
-          (sb-impl::toplevel-repl nil)
+          (progn
+            (when (and disable-debugger-provided?
+                       disable-debugger)
+              (disable-debugger))
+            (sb-impl::toplevel-repl nil))
           (with-pid-file-logic (pid-file :optional #t)
-            (disable-debugger)
+            (when (or (not disable-debugger-provided?)
+                      disable-debugger)
+              (disable-debugger))
             (handler-bind ((hu.dwim.rdbms:unconfirmed-schema-change
                             ;; NOTE: this handler is not bound in the started worker threads but EXPORT-MODEL is explicitly called at startup, so this is not a problem.
                             (lambda (error)
