@@ -118,7 +118,7 @@
               ;; TODO: put the timer stuff in hu.dwim.wui and remove dependency
               (bind ((timer (hu.dwim.wui::timer-of wui-server)))
                 (flet ((register-timer-entry (name time-interval thunk)
-                         (hu.dwim.wui:register-timer-entry timer thunk :time-interval time-interval :name name)))
+                         (hu.dwim.wui:register-timer-entry timer thunk :interval time-interval :name name)))
                   (register-timer-entry "Standard output ticker" (* 60 10)
                                         (named-lambda stdout-ticker ()
                                           (format *debug-io* "~A: Another heartbeat at request number ~A; it seems like all is well...~%"
@@ -139,10 +139,7 @@
                            (declare (ignore signal code scp))
                            (meta-model.info "SIGTERM/SIGINT was received, initiating shutdown")
                            (format *debug-io* "~%SIGTERM/SIGINT was received, initiating shutdown~%")
-                           (register-timer-entry "Quit now timer entry" nil
-                                                 (named-lambda quit-now ()
-                                                   (format *debug-io* "Aborting timer from the QUIT-NOW timer entry~%")
-                                                   (hu.dwim.wui:drive-timer/abort)))))
+                           (hu.dwim.wui:drive-timer/abort timer)))
                     (sb-sys:enable-interrupt sb-unix:sigterm #'running-signal-handler)
                     (sb-sys:enable-interrupt sb-unix:sigint #'running-signal-handler)))
                 (meta-model.info "Final signal handlers are installed, everything's started normally. Calling into DRIVE-TIMER now...")
