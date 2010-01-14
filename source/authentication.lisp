@@ -11,6 +11,10 @@
 
 (define-dynamic-context* authenticated-session () :create-class #f :export-symbols #t)
 
+(def function current-authenticated-session ()
+  ;; we keep this as a functional accessor to be able to add any needed asserts/logic later on
+  *authenticated-session*)
+
 (def (constant e) +maximum-http-agent-identifier-length+ 256)
 
 (def (constant e) +failed-authentication-warning-limit+ 10)
