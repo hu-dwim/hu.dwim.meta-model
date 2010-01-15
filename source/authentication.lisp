@@ -11,7 +11,7 @@
 
 (define-dynamic-context* authenticated-session () :create-class #f :export-symbols #t)
 
-(def function current-authenticated-session ()
+(def (function e) current-authenticated-session ()
   ;; we keep this as a functional accessor to be able to add any needed asserts/logic later on
   *authenticated-session*)
 
@@ -109,7 +109,7 @@
   (status.expired "expired")
   (status.shutdown "shutdown")
   (status.crashed "crashed")
-  
+
   (slot-name.subject "subject")
   (slot-name.authentication-instruments "authenticated instruments")
   (slot-name.status "status")
