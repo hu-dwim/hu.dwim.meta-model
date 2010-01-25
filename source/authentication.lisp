@@ -98,58 +98,6 @@
   (setf (effective-subject-of *authenticated-session*) subject)
   (invalidate-cached-instance *authenticated-session*))
 
-(def localization en
-  (type-name.ip-address "IP address")
-
-  (class-name.authentication-instrument "authentiucation instrument")
-  (class-name.authenticated-session "session")
-
-  (status.alive "alive")
-  (status.logged-out "logged out")
-  (status.expired "expired")
-  (status.shutdown "shutdown")
-  (status.crashed "crashed")
-
-  (slot-name.subject "subject")
-  (slot-name.authentication-instruments "authenticated instruments")
-  (slot-name.status "status")
-  (slot-name.login-at "login at")
-  (slot-name.logout-at "logout at")
-  (authenticated-session.web-application "application")
-  (slot-name.http-user-agent "http agent")
-  (slot-name.authenticated-subject "authenticated subject")
-  (slot-name.effective-subject "effective subject")
-  (slot-name.authenticated-sessions "sessions")
-  (slot-name.effective-sessions "effective sessions")
-  (slot-name.remote-ip-address "remote IP address")
-  (slot-name.web-session-id "web session ID"))
-
-(def localization hu
-  (type-name.ip-address "IP cím")
-
-  (class-name.authentication-instrument "azonosító eszköz")
-  (class-name.authenticated-session "belépés")
-
-  (status.alive "élő")
-  (status.logged-out "kilépve")
-  (status.expired "lejárt")
-  (status.shutdown "leállítva")
-  (status.crashed "lefagyott")
-
-  (slot-name.subject "alany")
-  (slot-name.authentication-instruments "azonosító eszközök")
-  (slot-name.status "állapot")
-  (slot-name.login-at "belépés időpontja")
-  (slot-name.logout-at "kilépés időpontja")
-  (authenticated-session.web-application "alkalmazás")
-  (slot-name.http-user-agent "http kliens")
-  (slot-name.authenticated-subject "azonosított alany")
-  (slot-name.effective-subject "effektív alany")
-  (slot-name.authenticated-sessions "belépések")
-  (slot-name.effective-sessions "effektív belépések")
-  (slot-name.remote-ip-address "kliens IP címe")
-  (slot-name.web-session-id "web session azonosító"))
-
 (def (special-variable e) *always-reload-authenticated-session-on-transaction-boundary* #t)
 
 (def function call-with-reloaded-authenticated-session (function)

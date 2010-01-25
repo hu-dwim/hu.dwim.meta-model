@@ -57,27 +57,6 @@
   (mapc [pushnew !1 *allowed-slot-definition-properties*]
         '(:definitive :editable :identity :reference :primary :flattened :compute-as)))
 
-;; TODO: owner-element-of
-
-;;;;;;
-;;; Localization
-
-(def localization en
-  (property.name "name")
-  (property.type "type")
-  (property.documentation "documentation")
-  (property.editable "editable")
-  (property.required "required")
-  (property.unique "unique"))
-
-(def localization hu
-  (property.name "név")
-  (property.type "típus")
-  (property.documentation "dokumentáció")
-  (property.editable "módosítható")
-  (property.required "kötelező")
-  (property.unique "egyedi"))
-
 ;;;;;;
 ;;; Property slot class meta objects
 

@@ -98,18 +98,6 @@
   (:documentation "A special relationship end that is part of a n-ary relationship."))
 
 ;;;;;;
-;;; Localization
-
-(def localization en
-  (class-name.relationship "relationship")
-  (class-name.relationship-element "relationship element")
-  (class-name.relationship-end "relationship end")
-  (class-name.binary-relationship "binary relationship")
-  (class-name.binary-relationship-end "binary relationship end")
-  (class-name.n-ary-relationship "n-ary relationship")
-  (class-name.n-ary-relationship-end "n-ary relationship end"))
-
-;;;;;;
 ;;; Defining relationships
 
 (def generic compute-relationships (relationship-element)

@@ -31,33 +31,6 @@
   (:documentation "A persistent process is a stateful activity which might go on for an extremely long time. It might start other activities and may communicate with them. A persistent process might also communicate with arbitrary number of users. The users may or may not be online while the process is running, so the process might have to wait for a long time. Asynchronous event handling, such as timeouts are also to be supported."))
 
 ;;;;;;
-;;; Localization
-
-(def localization en
-  (slot-name.process-state "process state")
-
-  (process-state.initializing "initializing")
-  (process-state.running "running")
-  (process-state.in-progress "in progress")
-  (process-state.paused "paused")
-  (process-state.finished "finished")
-  (process-state.failed "failed")
-  (process-state.cancelled "cancelled")
-  (process-state.broken "broken"))
-
-(def localization hu
-  (slot-name.process-state "folyamat állapot")
-
-  (process-state.initializing "felkészítés alatt")
-  (process-state.running "fut")
-  (process-state.in-progress "folyamatban")
-  (process-state.paused "felfüggesztve")
-  (process-state.finished "befeződött")
-  (process-state.failed "hibás")
-  (process-state.cancelled "elvetve")
-  (process-state.broken "tönkrement"))
-
-;;;;;;
 ;;; Model management
 
 (def (definer e :available-flags "e") persistent-process-class (name super-classes slots &body forms)
@@ -213,27 +186,6 @@
 
 (def (entity e) wait-for-message (wait-reason)
   ((message-class-name :type symbol)))
-
-;;;;;;
-;;; Localization
-
-(def localization en
-  (class-name.persistent-message "persistent message")
-  (class-name.message-queue "message queue")
-  (class-name.wait-reason "wait reason")
-  (class-name.wait-for-message "wait for message")
-  (class-name.wait-for-subject "wait for subject")
-  (class-name.wait-for-timestamp "wait for timestamp")
-  (class-name.persistent-process "persistent process"))
-
-(def localization hu
-  (class-name.persistent-message "perzisztens üzenet")
-  (class-name.message-queue "üzenetsor")
-  (class-name.wait-reason "várakozási ok")
-  (class-name.wait-for-message "üzenetre várakozás")
-  (class-name.wait-for-subject "alanyra várakozás")
-  (class-name.wait-for-timestamp "időpontra várakozás")
-  (class-name.persistent-process "megszakítható folyamat"))
 
 ;;;;;;
 ;;; Starting persistent processes

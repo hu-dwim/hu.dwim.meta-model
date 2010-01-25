@@ -52,25 +52,6 @@
     #f))
 
 ;;;;;;
-;;; Localization
-
-(def localization en
-  (class-name.subject "subject")
-  (class-name.technical-subject "technical subject")
-
-  (slot-name.name "name")
-  (slot-name.description "description")
-  (slot-name.login-disabled "login disabled"))
-
-(def localization hu
-  (class-name.subject "alany")
-  (class-name.technical-subject "technikai alany")
-
-  (slot-name.name "név")
-  (slot-name.description "leírás")
-  (slot-name.login-disabled "belépés letiltva"))
-
-;;;;;;
 ;;; Functional
 
 (def (function e) last-login-at (subject)

@@ -22,3 +22,6 @@
 ;; later on, one can install a persistent appender to store audit messages in the database.
 (def (logger e) audit ())
 (def (logger :export :printers) login (audit))
+
+;; TODO: move?
+(def localization-loader-callback meta-model-localization-loader :hu.dwim.meta-model "localization")
