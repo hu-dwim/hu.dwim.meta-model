@@ -52,8 +52,7 @@
     :type (or null (text 64))
     :primary #t)
    (web-session-id
-    ;; KLUDGE this is really #.hu.dwim.wui::+session-id-length+ but it's not yet available while loading
-    :type (or null (text 40))))
+    :type (or null (text #.hu.dwim.wui::+session-id-length+))))
   (:documentation "Egy a rendszer által azonosított belépés."))
 
 (def print-object (authenticated-session :identity #f)
