@@ -99,7 +99,7 @@
 
 (def (special-variable e) *always-reload-authenticated-session-on-transaction-boundary* #t)
 
-(def function call-with-reloaded-authenticated-session (function)
+(def (function e) call-with-reloaded-authenticated-session (function)
   (if (and (not hu.dwim.perec::*exporting-to-rdbms*) ;; KLUDGE? but we should leave alone the authenticated session while we are exporting something.
            (boundp '*authenticated-session*)
            *authenticated-session*
