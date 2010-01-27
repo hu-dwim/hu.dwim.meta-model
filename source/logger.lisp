@@ -24,4 +24,4 @@
 (def (logger :export :printers) login (audit))
 
 ;; TODO: move?
-(def hu.dwim.wui:localization-loader-callback meta-model-localization-loader :hu.dwim.meta-model "localization")
+(def hu.dwim.wui:localization-loader-callback meta-model-localization-loader :hu.dwim.meta-model "localization/")
