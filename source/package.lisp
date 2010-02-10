@@ -40,7 +40,8 @@
            #:transaction-mixin)
 
   (:import-from :hu.dwim.perec
-                #:compute-as)
+                #:compute-as
+                #:computed-universe/perec)
 
   (:export #:-operation-
            #:-instance-

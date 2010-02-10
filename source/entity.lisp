@@ -82,7 +82,7 @@
                          (aif (getf slot-options :compute-as)
                               (append (remove-from-plist slot-options :compute-as)
                                       `(:initform
-                                        (compute-as-in-transaction* (:universe (computed-universe-of *transaction*)) ,it)
+                                        (compute-as/transaction-specific ,it)
                                         :persistent #f
                                         :editable #f)
                                       (if (eq (and (consp it)
@@ -128,7 +128,7 @@
                          (aif (getf slot-options :compute-as)
                               (append (remove-from-plist slot-options :compute-as)
                                       `(:initform
-                                        (compute-as-in-transaction* (:universe (computed-universe-of *transaction*)) ,it)
+                                        (compute-as/transaction-specific ,it)
                                         :persistent #f
                                         :editable #f)
                                       (if (eq (and (consp it)

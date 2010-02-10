@@ -84,12 +84,16 @@
 (def method hu.dwim.rdbms:transaction-mixin-class list ((self postgresql/dwim))
   'transaction-mixin/dwim)
 
+(def computed-universe computed-universe/transaction-specific
+    :computed-state-factory-name compute-as/transaction-specific
+    :universe-accessor-form (computed-universe-of *transaction*))
+
 (def (class* e) transaction-mixin/dwim (hu.dwim.perec:transaction-mixin transaction-with-hooks-mixin)
-  ((computed-universe (make-computed-universe))))
+  ((computed-universe (make-instance 'computed-universe/transaction-specific))))
 
 (def method hu.dwim.rdbms:notify-transaction-event ((transaction transaction-mixin/dwim) event)
   (unless (eq event :select)
-    (incf (hu.dwim.computed-class::cu-pulse (computed-universe-of transaction)))))
+    (incf (hu.dwim.computed-class::pulse-of (computed-universe-of transaction)))))
 
 ;;;;;;
 ;;; Collecting and finding elements

@@ -90,8 +90,6 @@
     (compute-as (inherited-slot-option -self- 'to-be-flattened (primary-p -self-)))))
   (:documentation "The base class of all persistent effective property classes."))
 
-(define-computed-universe compute-as-in-transaction)
-
 (def function inherited-slot-option (effective-slot slot-name &optional (default-value nil default-value-p))
   (iter (for direct-slot in (direct-properties-of effective-slot))
         (if (and (find-slot (class-of direct-slot) slot-name :otherwise #f)

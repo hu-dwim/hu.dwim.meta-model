@@ -34,7 +34,7 @@
 (define-model-class relationship-end (owned-model-element)
   ((relationship-element
     :type relationship-element
-    :computed-in compute-as
+    :computed-in computed-universe/perec
     :documentation "A relationship end refers to a model element. The model element will be related with other model elements referred by other relationship ends within the same relationship.")
    (relationship
     :type relationship
