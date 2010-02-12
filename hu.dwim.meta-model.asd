@@ -40,6 +40,7 @@
                              (:file "generalization" :depends-on ("relationship"))
                              (:file "generate" :depends-on ("state-property" "persistent-process"))
                              (:file "logger" :depends-on ("package"))
+                             (:file "localization" :depends-on ("package"))
                              (:file "meta-model" :depends-on ("util"))
                              (:file "model" :depends-on ("model-element" "logger"))
                              (:file "model-element" :depends-on ("meta-model"))
