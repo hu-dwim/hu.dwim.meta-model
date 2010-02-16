@@ -88,9 +88,10 @@
 (def method hu.dwim.rdbms:transaction-mixin-class list ((self postgresql/dwim))
   'transaction-mixin/dwim)
 
-(def computed-universe (computed-universe/transaction
-                        :computed-state-factory-name compute-as/transaction-specific
-                        :universe-accessor-form (computed-universe-of *transaction*)))
+(def computed-universe computed-universe/transaction ()
+  ()
+  (:computed-state-factory-name compute-as/transaction-specific)
+  (:universe-accessor-form (computed-universe-of *transaction*)))
 
 (def (class* e) transaction-mixin/dwim (hu.dwim.perec:transaction-mixin transaction-with-hooks-mixin)
   ((computed-universe (make-instance 'computed-universe/transaction))))
