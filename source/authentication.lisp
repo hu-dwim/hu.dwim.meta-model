@@ -6,6 +6,21 @@
 
 (in-package :hu.dwim.meta-model)
 
+#+nil
+(progn
+  ;; TODO add an AUTHENTICATION entity which is instantiated every time an authentication happens. would provide support for re-authentication which is sometimes required by sensitive operations...
+
+  (def (entity e) authentication ()
+    (happened-at :type timestamp))
+
+  (def association
+    ((:slot authentications :type (set authentication))
+     (:slot authenticated-session :type authenticated-session)))
+
+  (def association
+    ((:slot authentications :type (set authentication))
+     (:slot authentication-instrument :type authentication-instrument))))
+
 ;;;;;;
 ;;; Authentication model
 
