@@ -162,5 +162,6 @@
                     (meta-model.debug "Still not ready to quit, waiting...")
                     (sleep 1))
               (flush-caching-appenders)
+              (delete-directory-for-temporary-files)
               (meta-model.info "Everything's down, exiting normally")
               (format *debug-io* "Everything's down, exiting normally~%")))))))
