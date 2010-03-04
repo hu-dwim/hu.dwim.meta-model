@@ -147,8 +147,9 @@
 
 (def function owner-entity-of (property)
   "Returns the exclusive owner as an entity of the given property."
-  (prog1-bind entity (hu.dwim.perec::slot-definition-class property)
-    (assert (typep entity 'entity) nil "A property must exclusively belong to an entity.")))
+  (aprog1
+      (hu.dwim.perec::persistent-slot-definition-class property)
+    (assert (typep it 'entity) () "A property must exclusively belong to an entity.")))
 
 ;; TODO: non portable CLOS program
 (def method shared-initialize :around ((entity entity) slot-names &rest args &key (statistics nil statistics-p) &allow-other-keys)
