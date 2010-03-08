@@ -31,10 +31,10 @@
 
 (define-model-class generalization-element (relationship-element)
   ((declared-generalizations
-    (compute-as (collect-if-typep 'generalization (declared-relationships-of -self-)))
+    (compute-as (collect-if (of-type 'generalization) (declared-relationships-of -self-)))
     :type (list generalization))
    (generalizations
-    (compute-as (collect-if-typep 'generalization (relationships-of -self-)))
+    (compute-as (collect-if (of-type 'generalization) (relationships-of -self-)))
     :type (list generalization)
     :documentation "A list of generalizations this element is part of.")
    (declared-direct-super-generalization-elements

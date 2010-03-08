@@ -13,13 +13,13 @@
   ((element-name
     (compute-as (class-name -self-)))
    (direct-properties
-    (compute-as (collect-if-typep 'direct-property (class-direct-slots -self-)))
+    (compute-as (collect-if (of-type 'direct-property) (class-direct-slots -self-)))
     :documentation "All direct properties including persistent and computed ones.")
    (effective-properties
-    (compute-as (collect-if-typep 'effective-property (class-slots (ensure-finalized -self-))))
+    (compute-as (collect-if (of-type 'effective-property) (class-slots (ensure-finalized -self-))))
     :documentation "All effective properties including persistent and computed ones.")
    (effective-association-ends
-    (compute-as (collect-if-typep 'effective-binary-association-end (effective-properties-of -self-)))
+    (compute-as (collect-if (of-type 'effective-binary-association-end) (effective-properties-of -self-)))
     :documentation "All effective association ends.")
    (statistics
     (make-statistics)
