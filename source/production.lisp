@@ -143,7 +143,7 @@
                   (register-timer-entry "Quit checker" 5
                                         (named-lambda ready-to-quit-checker ()
                                           (when (ready-to-quit? wui-server)
-                                            (hu.dwim.wui:drive-timer/abort))))
+                                            (hu.dwim.wui:drive-timer/abort timer))))
                   (register-timer-entry "Log flusher" 5
                                         'flush-caching-appenders)
                   (flet ((running-signal-handler (signal code scp)
