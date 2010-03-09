@@ -113,55 +113,75 @@
                        disable-debugger)
               (disable-debugger))
             (sb-impl::toplevel-repl nil))
-          (with-pid-file-logic (pid-file :optional #t)
-            (when (or (not disable-debugger-provided?)
-                      disable-debugger)
-              (disable-debugger))
-            (handler-bind ((hu.dwim.rdbms:unconfirmed-schema-change
-                            ;; NOTE: this handler is not bound in the started worker threads but EXPORT-MODEL is explicitly called at startup, so this is not a problem.
-                            (lambda (error)
-                              (best-effort-log-error "Exiting because something was tried to be altered in the RDBMS schema at unattended startup: ~A" error))))
-              (meta-model.info "Starting up cluster ~S" cluster-name)
-              (with-new-compiled-query-cache
+          (with-layered-error-handlers ((lambda (error)
+                                          (print-error-safely "Error reached toplevel in the main thread: ~A" error))
+                                        (lambda (&rest args)
+                                          (declare (ignore args))
+                                          (quit 3)))
+            (flet ((startup-signal-handler (signal code scp)
+                     (declare (ignore signal code scp))
+                     (format *debug-io* "SIGTERM/SIGINT was received while starting up, exiting abnormally~%")
+                     (quit 2)))
+              #*((:sbcl
+                  (sb-sys:enable-interrupt sb-unix:sigterm #'startup-signal-handler)
+                  (sb-sys:enable-interrupt sb-unix:sigint #'startup-signal-handler)
+                  (format *debug-io* "Temporary startup signal handlers are installed~%"))
+                 (t (warn "No support for installing signal handlers on your implementation, stale PID files may remain"))))
+            (surround-body-when pid-file
+                (with-pid-file (pid-file)
+                  (-body-))
+              (when (or (not disable-debugger-provided?)
+                        disable-debugger)
+                (disable-debugger))
+              (handler-bind ((hu.dwim.rdbms:unconfirmed-schema-change
+                              ;; NOTE: this handler is not bound in the started worker threads but EXPORT-MODEL is explicitly called at startup, so this is not a problem.
+                              (lambda (error)
+                                (print-error-safely "Exiting because something was tried to be altered in the RDBMS schema at unattended startup: ~A" error))))
+                (meta-model.info "Starting up cluster ~S" cluster-name)
                 #+nil
-                (hu.dwim.model:startup-cluster-node cluster-name wui-server))
-              (hu.dwim.wui:startup-server wui-server)
-              ;; TODO: put the timer stuff in hu.dwim.wui and remove dependency
-              (bind ((timer (hu.dwim.wui::timer-of wui-server)))
-                (flet ((register-timer-entry (name time-interval thunk)
-                         (hu.dwim.wui:register-timer-entry timer thunk :interval time-interval :name name)))
-                  (register-timer-entry "Standard output ticker" (* 60 10)
-                                        (named-lambda stdout-ticker ()
-                                          (format *debug-io* "~A: Another heartbeat at request number ~A; it seems like all is well...~%"
-                                                  (local-time:now) (awhen wui-server
-                                                                     (hu.dwim.wui:processed-request-counter-of it)))
-                                          (finish-output *debug-io*)))
-                  (register-timer-entry "Session purge" 60
-                                        (named-lambda session-purge ()
-                                          (with-model-database
-                                            (hu.dwim.wui:purge-sessions wui-application))))
-                  (register-timer-entry "Quit checker" 5
-                                        (named-lambda ready-to-quit-checker ()
-                                          (when (ready-to-quit? wui-server)
-                                            (hu.dwim.wui:drive-timer/abort timer))))
-                  (register-timer-entry "Log flusher" 5
-                                        'flush-caching-appenders)
-                  (flet ((running-signal-handler (signal code scp)
-                           (declare (ignore signal code scp))
-                           (meta-model.info "SIGTERM/SIGINT was received, initiating shutdown")
-                           (format *debug-io* "~%SIGTERM/SIGINT was received, initiating shutdown~%")
-                           (hu.dwim.wui:drive-timer/abort timer)))
-                    (sb-sys:enable-interrupt sb-unix:sigterm #'running-signal-handler)
-                    (sb-sys:enable-interrupt sb-unix:sigint #'running-signal-handler)))
-                (meta-model.info "Final signal handlers are installed, everything's started normally. Calling into DRIVE-TIMER now...")
-                (format *debug-io* "~A: Everything's started normally~%" (local-time:now))
-                (hu.dwim.wui::drive-timer timer))
-              ;; (hu.dwim.model:shutdown-cluster-node)
-              (hu.dwim.wui:shutdown-server wui-server)
-              (iter (until (ready-to-quit? wui-server))
-                    (meta-model.debug "Still not ready to quit, waiting...")
-                    (sleep 1))
-              (flush-caching-appenders)
-              (delete-directory-for-temporary-files)
-              (meta-model.info "Everything's down, exiting normally")
-              (format *debug-io* "Everything's down, exiting normally~%")))))))
+                (with-new-compiled-query-cache
+                  (hu.dwim.model:startup-cluster-node cluster-name wui-server))
+                (hu.dwim.wui:startup-server wui-server)
+                ;; TODO: put the timer stuff in hu.dwim.wui and remove dependency
+                (bind ((timer (hu.dwim.wui::timer-of wui-server)))
+                  (flet ((register-timer-entry (name time-interval thunk)
+                           (hu.dwim.wui:register-timer-entry timer thunk :interval time-interval :name name)))
+                    (register-timer-entry "Standard output ticker" (* 60 10)
+                                          (named-lambda stdout-ticker ()
+                                            (format *debug-io* "~A: Another heartbeat at request number ~A; it seems like all is well...~%"
+                                                    (local-time:now) (awhen wui-server
+                                                                       (hu.dwim.wui:processed-request-counter-of it)))
+                                            (finish-output *debug-io*)))
+                    (register-timer-entry "Session purge" 60
+                                          (named-lambda session-purge ()
+                                            (with-model-database
+                                              (hu.dwim.wui:purge-sessions wui-application))))
+                    (register-timer-entry "Quit checker" 5
+                                          (named-lambda ready-to-quit-checker ()
+                                            (when (ready-to-quit? wui-server)
+                                              (hu.dwim.wui:drive-timer/abort timer))))
+                    (register-timer-entry "Log flusher" 5
+                                          'flush-caching-appenders)
+                    #+nil
+                    (register-timer-entry "Status logger" 5
+                                          ;; TODO log some useful info like the number of web sessions, etc...
+                                          )
+                    (flet ((running-signal-handler (signal code scp)
+                             (declare (ignore signal code scp))
+                             (meta-model.info "SIGTERM/SIGINT was received, initiating shutdown")
+                             (format *debug-io* "~%SIGTERM/SIGINT was received, initiating shutdown~%")
+                             (hu.dwim.wui:drive-timer/abort timer)))
+                      (sb-sys:enable-interrupt sb-unix:sigterm #'running-signal-handler)
+                      (sb-sys:enable-interrupt sb-unix:sigint #'running-signal-handler)))
+                  (meta-model.info "Final signal handlers are installed, everything's started normally. Calling into DRIVE-TIMER now...")
+                  (format *debug-io* "~A: Everything's started normally~%" (local-time:now))
+                  (hu.dwim.wui::drive-timer timer))
+                ;; (hu.dwim.model:shutdown-cluster-node)
+                (hu.dwim.wui:shutdown-server wui-server)
+                (iter (until (ready-to-quit? wui-server))
+                      (meta-model.debug "Still not ready to quit, waiting...")
+                      (sleep 1))
+                (flush-caching-appenders)
+                (delete-directory-for-temporary-files)
+                (meta-model.info "Everything's down, exiting normally")
+                (format *debug-io* "Everything's down, exiting normally~%"))))))))
