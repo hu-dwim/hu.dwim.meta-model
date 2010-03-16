@@ -40,16 +40,6 @@
            #:transaction-mixin)
   (:import-from :hu.dwim.perec
                 #:computed-universe/perec)
-
-  (:export #:-operation-
-           #:-instance-
-           #:-entity-
-           #:-property-
-           #:-authenticated-subject-
-           #:-effective-subject-
-           #:-format-
-           #:top-level-authorization)
-
   (:readtable-setup
    (enable-standard-hu.dwim-syntaxes)
    (hu.dwim.syntax-sugar:enable-lambda-with-bang-args-syntax)))
