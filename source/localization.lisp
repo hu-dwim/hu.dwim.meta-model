@@ -6,4 +6,4 @@
 
 (in-package :hu.dwim.meta-model)
 
-(def hu.dwim.wui:localization-loader-callback meta-model-localization-loader :hu.dwim.meta-model "localization/")
+(def localization-loader-callback meta-model-localization-loader :hu.dwim.meta-model "localization/")

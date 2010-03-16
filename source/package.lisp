@@ -20,17 +20,17 @@
         :hu.dwim.perec
         :hu.dwim.syntax-sugar
         :hu.dwim.util
+        :hu.dwim.wui
         ;; there shouldn't be many references to :hu.dwim.walker, so just prefix the usages...
         :local-time
         :metacopy-with-contextl
         :trivial-garbage)
-
   (:shadowing-import-from :iterate
                           #:finish)
-
   (:shadowing-import-from :hu.dwim.def
                           #:iterator)
-
+  (:shadowing-import-from :hu.dwim.perec
+                          #:compute-as)
   (:shadow #:login
            #:model
            #:element
@@ -38,9 +38,7 @@
            #:code
            #:result
            #:transaction-mixin)
-
   (:import-from :hu.dwim.perec
-                #:compute-as
                 #:computed-universe/perec)
 
   (:export #:-operation-
