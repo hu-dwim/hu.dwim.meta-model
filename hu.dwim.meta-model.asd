@@ -18,14 +18,16 @@
                :hu.dwim.def+cl-l10n
                :hu.dwim.defclass-star
                :hu.dwim.delico
+               :hu.dwim.graphviz
                :hu.dwim.logger
-               :hu.dwim.perec.postgresql
                :hu.dwim.perec+iolib
+               :hu.dwim.perec.postgresql
                :hu.dwim.syntax-sugar
                :hu.dwim.util.production+swank
                :hu.dwim.util.worker-group
                :hu.dwim.walker
                :hu.dwim.wui
+               :hu.dwim.wui+cl-graph+cl-typesetting
                :iolib.sockets
                :local-time
                :metacopy-with-contextl
