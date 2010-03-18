@@ -41,5 +41,4 @@
   (:import-from :hu.dwim.perec
                 #:computed-universe/perec)
   (:readtable-setup
-   (enable-standard-hu.dwim-syntaxes)
-   (hu.dwim.syntax-sugar:enable-lambda-with-bang-args-syntax)))
+   (hu.dwim.def:setup-readtable/same-as-package :hu.dwim.wui)))
