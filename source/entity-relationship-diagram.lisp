@@ -109,8 +109,8 @@
                                                  relationship-element-name-vertex-map)
                                         :if-duplicate-do :force
                                         :dot-attributes `(:label ,"" ;; TODO: pass in relationship name?
-                                                                 :arrowhead ,(relationship-end-dot-arrow (primary-relationship-end-of relationship))
-                                                                 :arrowtail ,(relationship-end-dot-arrow (secondary-relationship-end-of relationship)))
+                                                          :arrowhead ,(relationship-end-dot-arrow (primary-relationship-end-of relationship))
+                                                          :arrowtail ,(relationship-end-dot-arrow (secondary-relationship-end-of relationship)))
                                         :head-arrow (relationship-end-arrow (primary-relationship-end-of relationship))
                                         :tail-arrow (relationship-end-arrow (secondary-relationship-end-of relationship)))))
 
