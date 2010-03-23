@@ -40,11 +40,38 @@
 ;;;;;;
 ;;; entity-relationship-diagram/documentation/inspector
 
-(def (component e) entity-relationship-diagram/documentation/inspector (t/documentation/inspector)
-  ())
+(def (component e) entity-relationship-diagram/documentation/inspector (t/documentation/inspector title/mixin)
+  ((graph :type component)))
+
+(def refresh-component entity-relationship-diagram/documentation/inspector
+  (bind (((:slots graph component-value) -self-))
+    (setf graph (make-instance 'entity-relationship-diagram/graph/inspector :component-value component-value))))
 
 (def method make-documentation ((component entity-relationship-diagram/documentation/inspector) (class standard-class) (prototype entity-relationship-diagram) (value entity-relationship-diagram))
   (documentation-of value))
+
+(def render-component entity-relationship-diagram/documentation/inspector
+  (render-title-for -self-)
+  (render-contents-for -self-)
+  (render-component (graph-of -self-)))
+
+(def render-xhtml entity-relationship-diagram/documentation/inspector
+  (with-render-style/abstract (-self-)
+    (render-title-for -self-)
+    (render-contents-for -self-)
+    (render-component (graph-of -self-))))
+
+(def layered-method make-title ((component entity-relationship-diagram/documentation/inspector) (class standard-class) (prototype entity-relationship-diagram) (value entity-relationship-diagram))
+  (title/widget ()
+    (localized-diagram-name value :capitalize-first-letter #t)))
+
+(def (function e) localized-diagram-name (diagram &key capitalize-first-letter)
+  (bind ((name (string-downcase (element-name-of diagram)))
+         (localized-name (lookup-first-matching-resource
+                           ("diagram-name" name))))
+    (if capitalize-first-letter
+        (capitalize-first-letter localized-name)
+        localized-name)))
 
 ;;;;;;
 ;;; entity-relationship-diagram/graph/inspector
