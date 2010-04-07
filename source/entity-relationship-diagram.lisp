@@ -23,11 +23,8 @@
   `(define-simple-entity-relationship-diagram ',diagram-name ',model-element-names ,@args))
 
 (def (definer e :available-flags "e") simple-entity-relationship-diagram (diagram-name model-element-names &rest args)
-  `(progn
-     (def-simple-entity-relationship-diagram ,diagram-name ,model-element-names ,@args)
-     ,@(when (getf -options- :export)
-        `((eval-when (:compile-toplevel :load-toplevel :execute)
-           (export ',diagram-name))))))
+  (with-standard-definer-options diagram-name
+    `(def-simple-entity-relationship-diagram ,diagram-name ,model-element-names ,@args)))
 
 ;;;;;;
 ;;; t/inspector
