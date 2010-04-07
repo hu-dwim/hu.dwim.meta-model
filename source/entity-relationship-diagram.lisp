@@ -22,8 +22,12 @@
 (def (macro e) def-simple-entity-relationship-diagram (diagram-name model-element-names &rest args)
   `(define-simple-entity-relationship-diagram ',diagram-name ',model-element-names ,@args))
 
-(def (definer e) simple-entity-relationship-diagram (diagram-name model-element-names &rest args)
-  `(def-simple-entity-relationship-diagram ,diagram-name ,model-element-names ,@args))
+(def (definer e :available-flags "e") simple-entity-relationship-diagram (diagram-name model-element-names &rest args)
+  `(progn
+     (def-simple-entity-relationship-diagram ,diagram-name ,model-element-names ,@args)
+     ,@(when (getf -options- :export)
+        `((eval-when (:compile-toplevel :load-toplevel :execute)
+           (export ',diagram-name))))))
 
 ;;;;;;
 ;;; t/inspector
