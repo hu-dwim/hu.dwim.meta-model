@@ -100,6 +100,7 @@
   ((:slot authenticated-sessions :type (set authenticated-session))
    (:slot authentication-instrument :type (or null authentication-instrument))))
 
+;; TODO maybe these should be symbol-macros?
 (def (function e) current-authenticated-subject ()
   (authenticated-subject-of *authenticated-session*))
 
@@ -206,7 +207,7 @@
         (setf (logout-at-of session) logout-at)
         (setf (status-of session) status)))
 
-(def (function e) valid-authenticated-session? (&optional (authenticated-session (when (has-authenticated-session)
+(def (function e) valid-authenticated-session? (&optional (authenticated-session (when (has-authenticated-session?)
                                                                                    *authenticated-session*)))
   (and (typep authenticated-session 'authenticated-session)
        (null (logout-at-of authenticated-session))))
