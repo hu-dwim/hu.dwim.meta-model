@@ -66,7 +66,9 @@
   (bind ((project-system (asdf:find-system project-system-name))
          (project-package (find-package (system-package-name project-system))))
     (setf *random-state* (make-random-state t))
+    (meta-model.debug "*random-state* was randomized to ~A" *random-state*)
     (setf *package* project-package)
+    (meta-model.debug "*package* was set ~A" *package*)
     (ensure-utf-8-external-format)
     ;; TODO: factor out the database arguments into rdbms
     (bind (((&key database-host database-port database-name database-user-name database-password
