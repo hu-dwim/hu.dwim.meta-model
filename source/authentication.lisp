@@ -123,7 +123,7 @@
            (not (instance-in-current-transaction-p *authenticated-session*)))
       (if *always-reload-authenticated-session-on-transaction-boundary*
           (progn
-            (authentication.debug "CALL-WITH-RELOADED-AUTHENTICATED-SESSION is loading an existing persistent authenticated-session")
+            (authentication.debug "CALL-WITH-RELOADED-AUTHENTICATED-SESSION is loading an existing persistent authenticated-session ~A" *authenticated-session*)
             (with-authenticated-session (load-instance *authenticated-session*)
               (funcall function)))
           (with-new-local-instance-changed-listeners
