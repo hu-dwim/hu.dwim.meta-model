@@ -25,8 +25,6 @@
         :local-time
         :metacopy-with-contextl
         :trivial-garbage)
-  (:shadowing-import-from :local-time
-                          #:time)
   (:shadowing-import-from :iterate
                           #:finish)
   (:shadowing-import-from :hu.dwim.def
