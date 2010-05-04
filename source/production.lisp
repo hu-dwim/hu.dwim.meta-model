@@ -47,21 +47,9 @@
            #+nil
            (hu.dwim.model:is-cluster-node-running?))))
 
-;; TODO: move to logger
-(def function setup-loggers-for-production (project-system-name)
-  (setf *log-directory* (format nil "/var/log/~A/" (string-downcase project-system-name)))
-  (unless (ignore-errors
-            (truename *log-directory*))
-    (error "Log directory does not exist or is not accessible. Tried: ~S" *log-directory*))
-  (bind ((standard-logger (find-logger 'standard-logger)))
-    (setf (hu.dwim.logger::appenders-of standard-logger)
-          (list (make-level-filtering-appender +warn+ (make-thread-safe-file-appender "error.log"))
-                (make-thread-safe-file-appender "root.log")))
-    (setf (log-level standard-logger) +info+)))
-
 ;; TODO: factor this apart into utility functions for better reusability and more finer control in the end application
 (def (function e) run-production-server (command-line-arguments project-system-name wui-server wui-application)
-  (setup-loggers-for-production project-system-name)
+  (setup-logging-for-production (string+ "/var/log/" (string-downcase project-system-name) "/"))
   (meta-model.info "~S toplevel init speaking" project-system-name)
   (bind ((project-system (asdf:find-system project-system-name))
          (project-package (find-package (system-package-name project-system))))
