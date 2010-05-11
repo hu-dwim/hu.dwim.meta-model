@@ -69,6 +69,11 @@
                                  "test"
                                  "production"))))
       (start-swank-server swank-port)
+      (when (or (and repl
+                     disable-debugger-provided?
+                     disable-debugger)
+                disable-debugger)
+        (disable-debugger))
       (when verbose
         (bind ((standard-logger (find-logger 'standard-logger)))
           (appendf (hu.dwim.logger::appenders-of standard-logger)
@@ -98,11 +103,7 @@
       (awhen (load-and-eval-config-file project-system-name)
         (meta-model.info "Loaded config file ~A" it))
       (if repl
-          (progn
-            (when (and disable-debugger-provided?
-                       disable-debugger)
-              (disable-debugger))
-            (sb-impl::toplevel-repl nil))
+          (sb-impl::toplevel-repl nil)
           (with-layered-error-handlers ((lambda (error)
                                           (print-error-safely "Error reached toplevel in the main thread: ~A" error))
                                         (lambda (&rest args)
@@ -121,9 +122,6 @@
               (surround-body-when pid-file
                   (with-pid-file (pid-file)
                     (-body-))
-                (when (or (not disable-debugger-provided?)
-                          disable-debugger)
-                  (disable-debugger))
                 (handler-bind ((hu.dwim.rdbms:unconfirmed-schema-change
                                 ;; NOTE: this handler is not bound in the started worker threads but EXPORT-MODEL is explicitly called at startup, so this is not a problem.
                                 (lambda (error)
