@@ -134,23 +134,26 @@
                   ;; TODO: put the timer stuff in hu.dwim.wui and remove dependency
                   (bind ((timer (hu.dwim.wui::timer-of wui-server)))
                     (flet ((%register-timer-entry (name time-interval thunk)
-                             (register-timer-entry timer thunk :interval time-interval :name name)))
-                      (%register-timer-entry "Standard output ticker" (* 60 10)
-                                             (named-lambda stdout-ticker ()
-                                               (format *debug-io* "~A: Another heartbeat at request number ~A; it seems like all is well...~%"
-                                                       (local-time:now) (awhen wui-server
-                                                                          (processed-request-counter-of it)))
-                                               (finish-output *debug-io*)))
-                      (%register-timer-entry "Session purge" 60
-                                             (named-lambda session-purge ()
-                                               (with-model-database
-                                                 (purge-sessions wui-application))))
-                      (%register-timer-entry "Quit checker" 5
-                                             (named-lambda ready-to-quit-checker ()
-                                               (when (ready-to-quit? wui-server)
-                                                 (drive-timer/abort timer))))
-                      (%register-timer-entry "Log flusher" 5
-                                             'flush-caching-appenders)
+                             (register-timer-entry timer thunk :interval time-interval :name name))
+                           (standard-output-ticker ()
+                             (format *debug-io* "~A: Another heartbeat at request number ~A, used memory ~,2F MiB, number of sessions ~A~%"
+                                     (local-time:now)
+                                     (when wui-server
+                                       (processed-request-counter-of wui-server))
+                                     (/ (sb-kernel::dynamic-usage) 1024 1024)
+                                     (when wui-server
+                                       (hash-table-count (session-id->session-of wui-server))))
+                             (finish-output *debug-io*))
+                           (session-purge ()
+                             (with-model-database
+                               (purge-sessions wui-application)))
+                           (quit-request-checker ()
+                             (when (ready-to-quit? wui-server)
+                               (drive-timer/abort timer))))
+                      (%register-timer-entry "Standard output ticker" (* 60 10) #'standard-output-ticker)
+                      (%register-timer-entry "Session purge" 60 #'session-purge)
+                      (%register-timer-entry "Quit request checker" 5 #'quit-request-checker)
+                      (%register-timer-entry "Log flusher" 5 'flush-caching-appenders)
                       #+nil
                       (%register-timer-entry "Status logger" 5
                                              ;; TODO log some useful info like the number of web sessions, etc...
