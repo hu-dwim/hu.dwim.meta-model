@@ -69,10 +69,9 @@
                                  "test"
                                  "production"))))
       (start-swank-server swank-port)
-      (when (or (and repl
-                     disable-debugger-provided?
-                     disable-debugger)
-                disable-debugger)
+      (when (and disable-debugger
+                 (or (not repl)
+                     disable-debugger-provided?))
         (disable-debugger))
       (when verbose
         (bind ((standard-logger (find-logger 'standard-logger)))
