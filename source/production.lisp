@@ -135,13 +135,14 @@
                     (flet ((%register-timer-entry (name time-interval thunk)
                              (register-timer-entry timer thunk :interval time-interval :name name))
                            (standard-output-ticker ()
-                             (format *debug-io* "~A: Another heartbeat at request number ~A, used memory ~,2F MiB, number of sessions ~A~%"
+                             (format *debug-io* "~A: Another heartbeat at request number ~A, used memory ~,2F MiB, application session counts ~A~%"
                                      (local-time:now)
                                      (when wui-server
                                        (processed-request-counter-of wui-server))
                                      (/ (sb-kernel::dynamic-usage) 1024 1024)
                                      (when wui-server
-                                       (hash-table-count (session-id->session-of wui-server))))
+                                       (mapcar (compose 'hash-table-count 'session-id->session-of)
+                                               (collect-if (of-type 'application) (brokers-of wui-server)))))
                              (finish-output *debug-io*))
                            (session-purge ()
                              (with-model-database
