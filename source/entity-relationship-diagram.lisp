@@ -27,9 +27,9 @@
     `(def-simple-entity-relationship-diagram ,diagram-name ,model-element-names ,@args)))
 
 ;;;;;;
-;;; t/inspector
+;;; t/alternator/inspector
 
-(def layered-method make-alternatives ((component t/inspector) (class standard-class) (prototype entity-relationship-diagram) (value entity-relationship-diagram))
+(def layered-method make-alternatives ((component t/alternator/inspector) (class standard-class) (prototype entity-relationship-diagram) (value entity-relationship-diagram))
   (list* (make-instance 'entity-relationship-diagram/documentation/inspector
                         :component-value value
                         :component-value-type (component-value-type-of component))
@@ -57,7 +57,7 @@
   (render-component (graph-of -self-)))
 
 (def render-xhtml entity-relationship-diagram/documentation/inspector
-  (with-render-style/abstract (-self-)
+  (with-render-style/component (-self-)
     (render-title-for -self-)
     (render-contents-for -self-)
     (render-component (graph-of -self-))))
@@ -77,7 +77,7 @@
 ;;;;;;
 ;;; entity-relationship-diagram/graph/inspector
 
-(def (component e) entity-relationship-diagram/graph/inspector (inspector/style content/widget)
+(def (component e) entity-relationship-diagram/graph/inspector (t/inspector content/widget)
   ())
 
 (def refresh-component entity-relationship-diagram/graph/inspector
