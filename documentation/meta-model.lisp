@@ -6,7 +6,7 @@
 
 (in-package :hu.dwim.meta-model.documentation)
 
-(def project :hu.dwim.meta-model :path (system-pathname :hu.dwim.meta-model))
+(def project :hu.dwim.meta-model)
 
 (def book user-guide (:title "User guide")
   (chapter (:title "Introduction")
