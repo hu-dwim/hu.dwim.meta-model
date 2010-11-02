@@ -104,9 +104,13 @@
       (if repl
           (sb-impl::toplevel-repl nil)
           (with-layered-error-handlers ((lambda (error)
-                                          (print-error-safely "Error reached toplevel in the main thread: ~A" error))
+                                          (print-error-safely (build-error-log-message :error-condition error
+                                                                                       :message "Error reached toplevel in the main thread"))
+                                          (unless disable-debugger
+                                            (invoke-debugger error)))
                                         (lambda (&rest args)
                                           (declare (ignore args))
+                                          (print-error-safely "Calling QUIT from toplevel error handler")
                                           (quit 3)))
             (with-temporary-directory ()
               (flet ((startup-signal-handler (signal code scp)
