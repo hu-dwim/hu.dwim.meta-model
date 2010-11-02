@@ -53,6 +53,7 @@
 ;;;;;;
 ;;; Defining entities
 
+;; TODO eliminate copy-paste...
 (def (macro e) defentity (class-name super-entities slots &rest options)
   (bind ((metaclass (or (second (find :metaclass options :key 'first))
                         (if (find :dimensions slots :test #'member)

@@ -6,6 +6,7 @@
 
 (in-package :hu.dwim.meta-model)
 
+;; TODO drop these
 (def function english-plural-symbol-for (symbol)
   (bind ((name (string-downcase (symbol-name symbol))))
     (intern (string-upcase (if (>= (length name) 2)

@@ -82,7 +82,8 @@
 ;;; Standard persistent processes
 
 (def (entity e) persistent-process (standard-process)
-  ((hu.dwim.util::process-state
+  ( ;; NOTE: the following slots are redefinitions of the slots of standard-process
+   (hu.dwim.util::process-state
     :primary #t
     :state-machine hu.dwim.util::process-state-machine
     :index :bitmap)
