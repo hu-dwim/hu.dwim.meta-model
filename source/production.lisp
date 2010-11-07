@@ -74,10 +74,10 @@
                      disable-debugger-provided?))
         (disable-debugger))
       (when verbose
-        (bind ((standard-logger (find-logger 'standard-logger)))
-          (appendf (hu.dwim.logger::appenders-of standard-logger)
+        (bind ((root-logger (find-logger 'root-logger)))
+          (appendf (hu.dwim.logger::appenders-of root-logger)
                    (list (make-instance 'brief-stream-appender :stream *standard-output*)))
-          (setf (log-level standard-logger) +debug+)
+          (setf (log-level root-logger) +debug+)
           (meta-model.debug "Set loggers to be verbose as requested by --verbose")))
       (when (and (not export-model)
                  (not repl))
