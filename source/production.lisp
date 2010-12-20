@@ -47,8 +47,14 @@
            #+nil
            (hu.dwim.model:is-cluster-node-running?))))
 
+(def function log-to-console (format-control &rest format-arguments)
+  (apply 'format *standard-output* format-control format-arguments)
+  (terpri *standard-output*)
+  (finish-output *standard-output*))
+
 ;; TODO: factor this apart into utility functions for better reusability and more finer control in the end application
 (def (function e) run-production-server (command-line-arguments project-system-name wui-server wui-application)
+  (log-to-console "Starting up server")
   (setup-logging-for-production (string+ "/var/log/" (string-downcase project-system-name) "/"))
   (meta-model.info "~S toplevel init speaking" project-system-name)
   (bind ((project-system (asdf:find-system project-system-name))
@@ -115,12 +121,12 @@
             (with-temporary-directory ()
               (flet ((startup-signal-handler (signal code scp)
                        (declare (ignore signal code scp))
-                       (format *debug-io* "SIGTERM/SIGINT was received while starting up, exiting abnormally~%")
+                       (log-to-console "SIGTERM/SIGINT was received while starting up; exiting abnormally")
                        (quit 2)))
                 #*((:sbcl
                     (sb-sys:enable-interrupt sb-unix:sigterm #'startup-signal-handler)
                     (sb-sys:enable-interrupt sb-unix:sigint #'startup-signal-handler)
-                    (format *debug-io* "Temporary startup signal handlers are installed~%"))
+                    (log-to-console "Temporary startup signal handlers are installed"))
                    (t (warn "No support for installing signal handlers on your implementation, stale PID files may remain"))))
               (surround-body-when pid-file
                   (with-pid-file (pid-file)
@@ -138,23 +144,22 @@
                   (bind ((timer (hu.dwim.wui::timer-of wui-server)))
                     (flet ((%register-timer-entry (name time-interval thunk)
                              (register-timer-entry timer thunk :interval time-interval :name name))
-                           (standard-output-ticker ()
-                             (format *debug-io* "~A: Another heartbeat at request number ~A, used memory ~,2F MiB, application session counts ~A~%"
-                                     (local-time:now)
-                                     (when wui-server
-                                       (processed-request-counter-of wui-server))
-                                     (/ (sb-kernel::dynamic-usage) 1024 1024)
-                                     (when wui-server
-                                       (mapcar (compose 'hash-table-count 'session-id->session-of)
-                                               (collect-if (of-type 'application) (brokers-of wui-server)))))
-                             (finish-output *debug-io*))
+                           (console-status-printer ()
+                             (log-to-console "~A: Another heartbeat at request number ~A, used memory ~,2F MiB, application session count ~A"
+                                             (local-time:now)
+                                             (when wui-server
+                                               (processed-request-counter-of wui-server))
+                                             (/ (sb-kernel::dynamic-usage) 1024 1024)
+                                             (when wui-server
+                                               (mapcar (compose 'hash-table-count 'session-id->session-of)
+                                                       (collect-if (of-type 'application) (brokers-of wui-server))))))
                            (session-purge ()
                              (with-model-database
                                (purge-sessions wui-application)))
                            (quit-request-checker ()
                              (when (ready-to-quit? wui-server)
                                (drive-timer/abort timer))))
-                      (%register-timer-entry "Standard output ticker" (* 60 10) #'standard-output-ticker)
+                      (%register-timer-entry "Console status printer" (* 60 10) #'console-status-printer)
                       (%register-timer-entry "Session purge" 60 #'session-purge)
                       (%register-timer-entry "Quit request checker" 5 #'quit-request-checker)
                       (%register-timer-entry "Log flusher" 5 'flush-caching-appenders)
@@ -165,18 +170,18 @@
                       (flet ((running-signal-handler (signal code scp)
                                (declare (ignore signal code scp))
                                (meta-model.info "SIGTERM/SIGINT was received, initiating shutdown")
-                               (format *debug-io* "~%SIGTERM/SIGINT was received, initiating shutdown~%")
+                               (log-to-console "~%SIGTERM/SIGINT was received, initiating shutdown")
                                (drive-timer/abort timer)))
                         (sb-sys:enable-interrupt sb-unix:sigterm #'running-signal-handler)
                         (sb-sys:enable-interrupt sb-unix:sigint #'running-signal-handler)))
                     (meta-model.info "Final signal handlers are installed, everything's started normally. Calling into DRIVE-TIMER now...")
-                    (format *debug-io* "~A: Everything's started normally~%" (local-time:now))
+                    (log-to-console "~A: Everything's started normally" (local-time:now))
                     (hu.dwim.wui::drive-timer timer))
                   ;; (hu.dwim.model:shutdown-cluster-node)
                   (shutdown-server wui-server)
                   (iter (until (ready-to-quit? wui-server))
                         (meta-model.debug "Still not ready to quit, waiting...")
                         (sleep 1))
-                  (flush-caching-appenders)
-                  (meta-model.info "Everything's down, exiting normally")
-                  (format *debug-io* "Everything's down, exiting normally~%")))))))))
+                  (flush-caching-appenders))))
+            (meta-model.info "Everything's down, exiting normally")
+            (log-to-console "Everything's down, exiting normally"))))))
