@@ -140,8 +140,8 @@
                   (with-new-compiled-query-cache
                     (hu.dwim.model:startup-cluster-node cluster-name wui-server))
                   (startup-server wui-server)
-                  ;; TODO: put the timer stuff in hu.dwim.wui and remove dependency
-                  (bind ((timer (hu.dwim.wui::timer-of wui-server)))
+                  ;; TODO: put the timer stuff in hu.dwim.web-server and remove dependency
+                  (bind ((timer (hu.dwim.web-server::timer-of wui-server)))
                     (flet ((%register-timer-entry (name time-interval thunk)
                              (register-timer-entry timer thunk :interval time-interval :name name))
                            (console-status-printer ()
@@ -176,7 +176,7 @@
                         (sb-sys:enable-interrupt sb-unix:sigint #'running-signal-handler)))
                     (meta-model.info "Final signal handlers are installed, everything's started normally. Calling into DRIVE-TIMER now...")
                     (log-to-console "~A: Everything's started normally" (local-time:now))
-                    (hu.dwim.wui::drive-timer timer))
+                    (hu.dwim.web-server::drive-timer timer))
                   ;; (hu.dwim.model:shutdown-cluster-node)
                   (shutdown-server wui-server)
                   (iter (until (ready-to-quit? wui-server))

@@ -14,5 +14,5 @@
         :hu.dwim.meta-model
         :hu.dwim.syntax-sugar
         :hu.dwim.util
-        :hu.dwim.wui)
-  (:readtable-setup (setup-readtable/same-as-package :hu.dwim.wui)))
+        :hu.dwim.presentation)
+  (:readtable-setup (setup-readtable/same-as-package :hu.dwim.presentation)))

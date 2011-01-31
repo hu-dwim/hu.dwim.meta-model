@@ -81,14 +81,8 @@
   ())
 
 (def refresh-component entity-relationship-diagram/graph/inspector
-  (bind (((:slots hu.dwim.wui::content component-value) -self-))
-    (setf hu.dwim.wui::content (build-graph-for-entity-relationship-diagram component-value))))
-
-(def (function e) build-graph-for-complete-entity-relationship-diagram ()
-  (let ((entities (collect-entities)))
-    (build-graph-for-structure-diagram-by-elements
-     entities
-     (collect-relationships-between-relationship-elements entities))))
+  (bind (((:slots hu.dwim.presentation::content component-value) -self-))
+    (setf hu.dwim.presentation::content (build-graph-for-entity-relationship-diagram component-value))))
 
 (def (function e) build-graph-for-entity-relationship-diagram (entity-relationship-diagram)
   (build-graph-for-structure-diagram entity-relationship-diagram))
@@ -115,14 +109,14 @@
 
 (def generic make-relationship-element-vertex (graph relationship-element &key &allow-other-keys)
   (:method (graph (relationship-element relationship-element) &key &allow-other-keys)
-    (bind ((name (hu.dwim.wui::localized-class-name relationship-element :capitalize-first-letter #t)))
+    (bind ((name (hu.dwim.presentation::localized-class-name relationship-element :capitalize-first-letter #t)))
       (cl-graph:add-vertex graph
                            (element-name-of relationship-element)
                            :dot-attributes `(:shape :box :label ,name)
                            :content name)))
 
   (:method (graph (class persistent-class) &key &allow-other-keys)
-    (bind ((name (hu.dwim.wui::localized-class-name class :capitalize-first-letter #t)))
+    (bind ((name (hu.dwim.presentation::localized-class-name class :capitalize-first-letter #t)))
       (cl-graph:add-vertex graph
                            (class-name class)
                            :dot-attributes `(:shape :box :label ,name)

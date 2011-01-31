@@ -26,8 +26,8 @@
                :hu.dwim.util.production+swank
                :hu.dwim.util.worker-group
                :hu.dwim.walker
-               :hu.dwim.wui
-               :hu.dwim.wui+cl-graph+cl-typesetting
+               :hu.dwim.presentation
+               :hu.dwim.presentation+cl-graph+cl-typesetting
                :iolib.sockets
                :local-time
                :metacopy-with-contextl

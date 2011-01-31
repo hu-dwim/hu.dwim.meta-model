@@ -67,7 +67,7 @@
     :type (or null (text 64))
     :primary #t)
    (web-session-id
-    :type (or null (text #.hu.dwim.wui::+session-id-length+))))
+    :type (or null (text #.hu.dwim.web-server::+session-id-length+))))
   (:documentation "Egy a rendszer által azonosított belépés."))
 
 (def print-object (authenticated-session :identity #f)

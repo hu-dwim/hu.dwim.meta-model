@@ -11,7 +11,7 @@
 (defsystem :hu.dwim.meta-model.documentation
   :class hu.dwim.documentation-system
   :depends-on (:hu.dwim.meta-model.test
-               :hu.dwim.wui)
+               :hu.dwim.presentation)
   :components ((:module "documentation"
                 :components ((:file "meta-model" :depends-on ("package"))
                              (:file "package")))))

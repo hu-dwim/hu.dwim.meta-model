@@ -18,10 +18,11 @@
         :hu.dwim.delico
         :hu.dwim.logger
         :hu.dwim.perec
+        :hu.dwim.presentation
         :hu.dwim.syntax-sugar
         :hu.dwim.util
-        :hu.dwim.wui
-        ;; there shouldn't be many references to :hu.dwim.walker, so just prefix the usages...
+        :hu.dwim.web-server
+        ;; :hu.dwim.walker is deliberately not use'd to be able to find those few references to it
         :local-time
         :metacopy-with-contextl
         :trivial-garbage)
@@ -41,4 +42,4 @@
   (:import-from :hu.dwim.perec
                 #:computed-universe/perec)
   (:readtable-setup
-   (hu.dwim.def:setup-readtable/same-as-package :hu.dwim.wui)))
+   (hu.dwim.def:setup-readtable/same-as-package :hu.dwim.presentation)))
