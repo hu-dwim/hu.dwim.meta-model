@@ -66,6 +66,7 @@
                               (return-from export-model))
                        :report-function (lambda (stream)
                                           (format stream "~@<Skip ~S~@:>" 'export-model))))
+        ;; TODO collect-entities?!
         (mapc #'hu.dwim.perec::ensure-exported (collect-entities))
         (hu.dwim.perec::finalize-persistent-classes)
         (hu.dwim.perec::finalize-persistent-associations)))))

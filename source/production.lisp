@@ -64,6 +64,7 @@
     (setf *package* project-package)
     (meta-model.debug "*package* was set ~A" *package*)
     (ensure-utf-8-external-format)
+    ;; TODO what about *terminal-io*? maybe: (setf *terminal-io* *standard-output*)
     ;; TODO: factor out the database arguments into rdbms
     (bind (((&key database-host database-port database-name database-user-name database-password
                   cluster-name pid-file swank-port repl test-mode verbose (export-model #t) (disable-debugger #t disable-debugger-provided?)
