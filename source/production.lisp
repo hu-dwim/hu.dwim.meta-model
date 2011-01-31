@@ -54,7 +54,7 @@
 
 ;; TODO: factor this apart into utility functions for better reusability and more finer control in the end application
 (def (function e) run-production-server (command-line-arguments project-system-name wui-server wui-application)
-  (log-to-console "Starting up server")
+  (log-to-console "Starting up server, PID is ~S" (isys:getpid))
   (setup-logging-for-production (string+ "/var/log/" (string-downcase project-system-name) "/"))
   (meta-model.info "~S toplevel init speaking" project-system-name)
   (bind ((project-system (asdf:find-system project-system-name))
