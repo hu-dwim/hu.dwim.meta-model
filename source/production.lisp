@@ -115,8 +115,7 @@
                                                                                        :message "Error reached toplevel in the main thread"))
                                           (unless disable-debugger
                                             (invoke-debugger error)))
-                                        (lambda (&rest args)
-                                          (declare (ignore args))
+                                        (lambda (&key &allow-other-keys)
                                           (print-error-safely "Calling QUIT from toplevel error handler")
                                           (quit 3)))
             (with-temporary-directory ()
