@@ -83,7 +83,7 @@
       (when verbose
         (bind ((root-logger (find-logger 'root-logger)))
           (appendf (hu.dwim.logger::appenders-of root-logger)
-                   (list (make-instance 'brief-stream-appender :stream *standard-output*)))
+                   (list (make-thread-safe-stream-appender '*standard-output*)))
           (setf (log-level root-logger) +debug+)
           (meta-model.debug "Set loggers to be verbose as requested by --verbose")))
       (when (and (not export-model)
