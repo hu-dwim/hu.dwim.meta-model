@@ -47,11 +47,6 @@
            #+nil
            (hu.dwim.model:is-cluster-node-running?))))
 
-(def function log-to-console (format-control &rest format-arguments)
-  (apply 'format *standard-output* format-control format-arguments)
-  (terpri *standard-output*)
-  (finish-output *standard-output*))
-
 ;; TODO: factor this apart into utility functions for better reusability and more finer control in the end application
 (def (function e) run-production-server (command-line-arguments project-system-name wui-server wui-application)
   (log-to-console "Starting up server, PID is ~S" (isys:getpid))
