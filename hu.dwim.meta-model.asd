@@ -18,7 +18,7 @@
                :hu.dwim.def+cl-l10n
                :hu.dwim.defclass-star
                :hu.dwim.delico
-               :hu.dwim.graphviz
+               :hu.dwim.graphviz ; TODO this is a heavy dependency with a .so, consider eliminating somehow
                :hu.dwim.logger
                :hu.dwim.perec+iolib
                :hu.dwim.perec.postgresql
