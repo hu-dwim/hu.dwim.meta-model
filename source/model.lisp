@@ -50,27 +50,6 @@
 (def special-variable *model* (make-model)
   "This is the singleton top level model object which contains all the defined model elements.")
 
-(def (function e) export-model ()
-  (bind ((all-the-rest-confirmed? #f))
-    (handler-bind ((hu.dwim.rdbms:unconfirmed-schema-change
-                    (lambda (condition)
-                      (when all-the-rest-confirmed?
-                        (hu.dwim.rdbms:continue-with-schema-change condition)))))
-      (restart-bind ((accept-all-schema-changes
-                      (lambda ()
-                        (setf all-the-rest-confirmed? #t)
-                        (hu.dwim.rdbms:continue-with-schema-change))
-                       :report-function (lambda (stream)
-                                          (format stream "~@<Confirm this and all upcoming schema changes inside this call to ~S without entering the debugger~@:>" 'export-model)))
-                     (abort (lambda ()
-                              (return-from export-model))
-                       :report-function (lambda (stream)
-                                          (format stream "~@<Skip ~S~@:>" 'export-model))))
-        ;; TODO collect-entities?!
-        (mapc #'hu.dwim.perec::ensure-exported (collect-entities))
-        (hu.dwim.perec::finalize-persistent-classes)
-        (hu.dwim.perec::finalize-persistent-associations)))))
-
 (def (macro e) with-model-database (&body body)
   "Makes sure the body is in a context where a database connection is available."
   `(with-database (database-of *model*)

@@ -88,7 +88,7 @@
           (meta-model.debug "Set loggers to be verbose as requested by --verbose")))
       (when (and (not export-model)
                  (not repl))
-        (cerror "Start in repl mode" "Skipping export-model is only allowed in REPL mode")
+        (cerror "Start in repl mode" "Skipping ~S is only allowed in REPL mode" 'export-persistent-classes-to-database-schema)
         (setf repl #t))
       (meta-model.info "Using database connection: ~S" loggable-connection-specification)
       (unless (and database-host database-port database-name database-user-name database-password)
@@ -103,9 +103,9 @@
                   database-name)))
       (when export-model
         (with-simple-restart (skip-export-model "Skip synchronizing the model in the VM with the database SQL schema")
-          (meta-model.info "Calling EXPORT-MODEL with database ~A, connection-specification ~A" (database-of *model*) loggable-connection-specification)
+          (meta-model.info "Calling EXPORT-PERSISTENT-CLASSES-TO-DATABASE-SCHEMA with database ~A, connection-specification ~A" (database-of *model*) loggable-connection-specification)
           (with-model-transaction
-            (export-model))))
+            (export-persistent-classes-to-database-schema))))
       (awhen (load-and-eval-config-file project-system-name)
         (meta-model.info "Loaded config file ~A" it))
       (if repl
@@ -132,7 +132,7 @@
                   (with-pid-file (pid-file)
                     (-body-))
                 (handler-bind ((hu.dwim.rdbms:unconfirmed-schema-change
-                                ;; NOTE: this handler is not bound in the started worker threads but EXPORT-MODEL is explicitly called at startup, so this is not a problem.
+                                ;; NOTE: this handler is not bound in the started worker threads but EXPORT-PERSISTENT-CLASSES-TO-DATABASE-SCHEMA is explicitly called at startup, so this is not a problem.
                                 (lambda (error)
                                   (print-error-safely "Exiting because something was tried to be altered in the RDBMS schema at unattended startup: ~A" error))))
                   (meta-model.info "Starting up cluster ~S" cluster-name)
