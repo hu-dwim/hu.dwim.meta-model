@@ -63,7 +63,7 @@
     (meta-model.debug "*random-state* was randomized to ~A" *random-state*)
     (setf *package* project-package)
     (meta-model.debug "*package* was set ~A" *package*)
-    (ensure-utf-8-external-format)
+    (ensure-default-external-format-is-utf-8)
     ;; TODO what about *terminal-io*? maybe: (setf *terminal-io* *standard-output*)
     ;; TODO: factor out the database arguments into rdbms
     (bind (((&key database-host database-port database-name database-user-name database-password
