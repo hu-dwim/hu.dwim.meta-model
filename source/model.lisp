@@ -10,39 +10,10 @@
 ;;; Top level model entry points
 
 (define-model-class model (model-element-collection)
-  ((database-type
-    'postgresql/dwim
-    :type symbol)
-   (connection-specification
-    nil
-    :type list
-    :documentation "Contains the data needed to set up the database connection.")
-   (database
-    nil
-    :documentation "Used for caching the hu.dwim.rdbms database instance.")
-   (transaction-mixin
-    nil ; postgresql/dwim adds what it needs to add
-    :documentation "The mixin class name for transactions.")
-   (model-element-cache
+  ((model-element-cache
     (make-hash-table :test #'equal :synchronized #t)
     :documentation "A map from (cons TYPE NAME) to model elements"))
   (:documentation "The top level container of model elements. There is only one instance of this class and there should never be more. The reason for this is to avoid intoducing superfluous barriers between models and model elements. If you ever want to have several instances, then you probably should introduce a new meta class instead and use it as part of the model."))
-
-(def method (setf database-type-of) :after (new-value (self model))
-  (clearf (database-of self)))
-
-(def method (setf connection-specification-of) :after (new-value (self model))
-  (clearf (database-of self)))
-
-(def method database-of :around ((self model))
-  (bind ((database (call-next-method)))
-    (unless database
-      (setf database (make-instance (database-type-of self)
-                                    :generated-transaction-class-name 'transaction
-                                    :transaction-mixin (transaction-mixin-of self)
-                                    :connection-specification (connection-specification-of self)))
-      (setf (database-of self) database))
-    database))
 
 ;;;;;;
 ;;; Generic model functions
@@ -51,16 +22,9 @@
   "This is the singleton top level model object which contains all the defined model elements.")
 
 (def (macro e) with-model-database (&body body)
-  "Makes sure the body is in a context where a database connection is available."
-  `(with-database (database-of *model*)
+  (simple-style-warning "FIXME: ~S is obsolete and only expands to a simple PROGN" 'with-model-database)
+  `(progn
      ,@body))
-
-(def (macro e) with-model-transaction (&body body)
-  "A transaction for *model* with its own query cache."
-  `(with-model-database
-     (with-new-compiled-query-cache
-       (with-transaction
-         ,@body))))
 
 (def class* postgresql/dwim (hu.dwim.perec:database-mixin hu.dwim.rdbms.postgresql:postgresql)
   ())
