@@ -9,6 +9,8 @@
 ;;;;;;
 ;;; Scheduler
 
+;; TODO merge this and the web-server workers into a default worker group
+
 (def special-variable *persistent-process-scheduler* nil)
 
 (def special-variable *persistent-process-scheduler-keep-on-running* #f)
@@ -92,11 +94,12 @@
             (push-persistent-process-job
              (bind ((authenticated-session *authenticated-session*))
                (lambda ()
-                 (standalone-continue-persistent-process process authenticated-session)))))
+                 (continue-persistent-process/job process authenticated-session)))))
           (finally (return processes)))))
 
-(def function standalone-continue-persistent-process (process authenticated-session)
+(def function continue-persistent-process/job (process authenticated-session)
   (assert hu.dwim.perec::*compiled-query-cache*)
+  ;; TODO use a shorter with-deadline and a longer with-timeout as a last resort
   (sb-ext:with-timeout (worker-timeout-of (class-of process))
     (with-model-database
       (with-authenticated-session authenticated-session

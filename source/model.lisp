@@ -18,6 +18,8 @@
 ;;;;;;
 ;;; Generic model functions
 
+;; TODO delme? but where should we collect model-elements then? but do we need to collect anything on top of what perec already keeps track of?
+;; but even if we do, why don't we just have a bunch of globals, e.g. (def namespace ...)-es?
 (def special-variable *model* (make-model)
   "This is the singleton top level model object which contains all the defined model elements.")
 
