@@ -285,14 +285,13 @@
       (setf (logout-at-of authenticated-session) (transaction-timestamp)))))
 
 (def function average-authenticated-session-time (authenticated-sessions)
-  (iter (with count = 0)
-        (for authenticated-session :in authenticated-sessions)
+  (iter (for authenticated-session :in authenticated-sessions)
         (bind ((login (login-at-of authenticated-session))
                (logout (logout-at-of authenticated-session)))
           (if logout
               (progn
-                (sum (local-time:timestamp-difference logout login) :into sum)
-                (incf count))))
+                (summing (local-time:timestamp-difference logout login) :into sum)
+                (summing 1 :into count))))
         (finally
          (return (values (coerce (/ sum 60) 'float)
                          count
