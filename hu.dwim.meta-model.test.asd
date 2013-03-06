@@ -4,12 +4,9 @@
 ;;;
 ;;; See LICENCE for details.
 
-(load-system :hu.dwim.asdf)
-
-(in-package :hu.dwim.asdf)
-
 (defsystem :hu.dwim.meta-model.test
-  :class hu.dwim.test-system
+  :defsystem-depends-on (:hu.dwim.asdf)
+  :class "hu.dwim.asdf:hu.dwim.test-system"
   :depends-on (:hu.dwim.meta-model
                :hu.dwim.stefil+hu.dwim.def+swank)
   :components ((:module "test"
