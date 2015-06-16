@@ -21,6 +21,7 @@
                :hu.dwim.perec.postgresql
                :hu.dwim.syntax-sugar
                :hu.dwim.util.production+swank
+               :hu.dwim.util.standard-process
                :hu.dwim.util.worker-group
                :hu.dwim.walker
                :hu.dwim.presentation
