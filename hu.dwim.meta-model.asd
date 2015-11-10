@@ -25,7 +25,7 @@
                :hu.dwim.walker
                :hu.dwim.presentation
                :hu.dwim.presentation+cl-graph+cl-typesetting
-               :iolib.sockets
+               :iolib/sockets
                :local-time
                :metacopy-with-contextl
                :trivial-garbage)
