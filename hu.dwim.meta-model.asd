@@ -20,7 +20,7 @@
                :hu.dwim.perec+iolib
                :hu.dwim.perec.postgresql
                :hu.dwim.syntax-sugar
-               :hu.dwim.util/production+swank
+               :hu.dwim.util/production
                :hu.dwim.util/standard-process
                :hu.dwim.util/worker-group
                :hu.dwim.walker
