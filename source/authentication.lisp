@@ -244,23 +244,21 @@
             (setf *authenticated-session* parent-session)))
       (invalidate-cached-instance previous-authenticated-session))))
 
-(def (macro e) with-authenticated-and-effective-subject (subject &body forms)
+(def (with-macro e) with-authenticated-and-effective-subject (subject)
   "Useful to unconditionally set a technical subject, for example when importing data. This inserts a new AUTHENTICATED-SESSION in the database, use accordingly..."
-  (once-only (subject)
-    (with-unique-names (in-transaction? timestamp)
-      `(bind ((,in-transaction? (hu.dwim.rdbms:in-transaction-p))
-              (,timestamp (if ,in-transaction?
-                              (transaction-timestamp)
-                              (now))))
-         (assert ,subject)
-         (with-authenticated-session (make-instance 'authenticated-session
-                                                    :persistent ,in-transaction?
-                                                    :effective-subject ,subject
-                                                    :authenticated-subject ,subject
-                                                    :login-at ,timestamp
-                                                    ;; since this is going to run in a single transaction what else could we set?
-                                                    :logout-at ,timestamp)
-           ,@forms)))))
+  (assert subject)
+  (bind ((in-transaction? (hu.dwim.rdbms:in-transaction-p))
+         (timestamp (if in-transaction?
+                        (transaction-timestamp)
+                        (now))))
+    (with-authenticated-session (make-instance 'authenticated-session
+                                               :persistent in-transaction?
+                                               :effective-subject subject
+                                               :authenticated-subject subject
+                                               :login-at timestamp
+                                               ;; since this is going to run in a single transaction what else could we set?
+                                               :logout-at timestamp)
+      (-body-))))
 
 (def function select-authenticated-sessions-with-login-after-timestamp (timestamp)
   (select (authenticated-session)
