@@ -181,11 +181,15 @@
                                       (from (session authenticated-session))
                                       (where (and (eq (authenticated-subject-of session) subject)
                                                   (null (logout-at-of session)))))))
-            ;; TODO invalidate web sessions of the parallel authenticated sessions?
             (iter (for parallel-session :in-sequence parallel-sessions)
                   (unless (eq parallel-session authenticated-session)
                     (authentication.info "Forcing logout of parallel session ~A, authenticated subject ~A" parallel-session (authenticated-subject-of parallel-session))
-                    (setf (logout-at-of parallel-session) (transaction-timestamp))))))
+                    (setf (logout-at-of parallel-session) (transaction-timestamp))
+                    ;; invalidate web sessions of the parallel authenticated sessions
+                    (bind ((web-session-id (web-session-id-of parallel-session)))
+                      (awhen (and web-session-id
+                                  (hu.dwim.web-server::find-session-by-id *application* web-session-id :otherwise nil))
+                        (mark-session-invalid it)))))))
         authenticated-session))))
 
 (def (function e) logout/authenticated-session (&key (status :logged-out) (logout-at (transaction-timestamp)))
