@@ -217,7 +217,7 @@
   (:method ((generalization-element persistent-class))
            nil))
 
-(def generic find-generalization-end (generalization generalization)
+(def generic find-generalization-end (generalization generalization-end-name)
   (:method ((generalization-name symbol) (generalization-end-name symbol))
            (if-bind generalization (find-generalization generalization-name)
              (find-generalization-end generalization generalization-end-name)
