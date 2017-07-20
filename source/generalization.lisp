@@ -62,7 +62,7 @@
   ((primary-relationship-end            ; override base slot
     :accessor sub-generalization-end-p
     :type boolean)
-   (secondary-relationship-end          ; override base slot 
+   (secondary-relationship-end          ; override base slot
     :accessor super-generalization-end-p
     :type boolean)
    (relationship-element                ; override base slot
@@ -75,7 +75,7 @@
    (other-relationship-end              ; override base slot
     :accessor other-generalization-end-of
     :type generalization-end)
-   (other-relationship-element          ; override base slot 
+   (other-relationship-element          ; override base slot
     :type generalization-element
     :accessor other-generalization-element-of))
   (:documentation "A generalization-end refers to a generalization-element and further specifies how the element is treated in the generalization."))
