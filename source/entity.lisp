@@ -111,6 +111,7 @@
                                                              (cdr slot)
                                                              (cddr slot))))
                                       (when (getf slot-options :compute-as)
+                                        ;; TODO FIXME err... are we here silently overriding some user defined values?
                                         (clearf (getf slot-options :dimensions)))
                                       slot))
                                   slots)))
@@ -122,20 +123,23 @@
              (:slot-definition-transformer
               (lambda (slot-definition)
                 ,(awhen (second (find :slot-definition-transformer options :key 'first))
-                        `(setf slot-definition (funcall ,it slot-definition)))
+                   `(setf slot-definition (funcall ,it slot-definition)))
                 (bind ((slot-name (car slot-definition))
                        (slot-options (cdr slot-definition)))
                   (list* slot-name
                          (aif (getf slot-options :compute-as)
-                              (append (remove-from-plist slot-options :compute-as)
-                                      `(:initform
-                                        (compute-as/transaction-specific ,it)
-                                        :persistent #f
-                                        :editable #f)
-                                      (if (eq (and (consp it)
-                                                   (first it)) 'select)
+                              (progn
+                                (assert (null (getf slot-options :initform)) () "You have given both an :INITFORM and a :COMPUTE-AS in the slot definition ~S of entity ~S" slot-definition ',class-name)
+                                (append (remove-from-plist slot-options :compute-as :initform)
+                                        `(:initform
+                                          (compute-as/transaction-specific ,it)
+                                          :persistent #f
+                                          :editable #f)
+                                        (when (eq (and (consp it)
+                                                       (first it))
+                                                  'select)
                                           `(:property-query (prog1-bind query (make-query ',it)
-                                                              (add-lexical-variable query '-self-)))))
+                                                              (add-lexical-variable query '-self-))))))
                               slot-options))))))
             ,@processed-options)
        (unless (find-entity ',class-name :ignore-missing #t)

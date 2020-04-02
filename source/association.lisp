@@ -125,4 +125,3 @@
 
 (def method relationship-element-of ((association-end persistent-association-end-slot-definition))
   (hu.dwim.perec::associated-class-of association-end))
-
