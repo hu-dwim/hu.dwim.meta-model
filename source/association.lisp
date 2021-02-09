@@ -74,7 +74,7 @@
 ;;;;;;
 ;;; Defining associations
 
-(def definer association (&body association-ends)
+(def (definer e :available-flags "e") association (&body association-ends)
   (bind ((options (cdr association-ends))
          (primary-association-end (first (first association-ends)))
          (secondary-association-end (second (first association-ends)))
