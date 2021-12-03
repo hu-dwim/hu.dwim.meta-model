@@ -32,7 +32,7 @@
                :trivial-garbage)
   :components ((:module "source"
                 :components ((:file "association" :depends-on ("statistics" "relationship" "generalization" "property"))
-                             (:file "authentication" :depends-on ("entity" "subject" "change-notification"))
+                             (:file "authentication" :depends-on ("entity" "subject" "change-notification" "association"))
                              (:file "change-notification" :depends-on ("model"))
                              (:file "entity" :depends-on ("statistics" "generalization" "association" "type"))
                              (:file "entity-relationship-diagram" :depends-on ("entity" "structure-diagram"))
